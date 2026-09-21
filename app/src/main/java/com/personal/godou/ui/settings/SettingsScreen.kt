@@ -155,6 +155,7 @@ fun SettingsScreen(
                                         { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
                                     } else null,
                                     colors = FilterChipDefaults.filterChipColors(
+                                        containerColor = Color.Transparent,
                                         selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                                         selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
                                     ),
@@ -304,6 +305,7 @@ fun SettingsScreen(
                                         { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
                                     } else null,
                                     colors = FilterChipDefaults.filterChipColors(
+                                        containerColor = Color.Transparent,
                                         selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                                         selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer
                                     ),
@@ -570,9 +572,9 @@ private fun SettingsSectionCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
-        shadowElevation = 2.dp
+        shadowElevation = 0.dp
     ) {
         Column(
             modifier = Modifier.padding(18.dp)
