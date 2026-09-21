@@ -2,6 +2,7 @@ package com.personal.godou.ui
 
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -19,18 +20,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.personal.godou.ui.components.SuperellipseShape
 import com.personal.godou.ui.home.HomeScreen
 import com.personal.godou.ui.settings.SettingsScreen
 import com.personal.godou.ui.settings.ThemeViewModel
@@ -63,17 +65,24 @@ fun GodouAppRoot(
             color = MaterialTheme.colorScheme.background
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                // ── Screen Content with Spring Animated Transition ──
+                // ── Screen Content with M3 Expressive Shared-Axis Transition ──
                 AnimatedContent(
                     targetState = currentRoute,
                     transitionSpec = {
-                        (slideInHorizontally(ExpressivePhysics.fluidBouncy()) { width ->
-                            if (targetState.ordinal > initialState.ordinal) width / 3 else -width / 3
-                        } + fadeIn(ExpressivePhysics.fluidBouncy()))
+                        val isMovingRight = targetState.ordinal > initialState.ordinal
+                        (slideInHorizontally(ExpressivePhysics.fluidBouncy()) { fullWidth ->
+                            if (isMovingRight) fullWidth else -fullWidth
+                        } + scaleIn(
+                            animationSpec = ExpressivePhysics.fluidBouncy(),
+                            initialScale = 0.88f
+                        ) + fadeIn(ExpressivePhysics.fluidBouncy()))
                             .togetherWith(
-                                slideOutHorizontally(ExpressivePhysics.fluidBouncy()) { width ->
-                                    if (targetState.ordinal > initialState.ordinal) -width / 3 else width / 3
-                                } + fadeOut(ExpressivePhysics.fluidBouncy())
+                                slideOutHorizontally(ExpressivePhysics.fluidBouncy()) { fullWidth ->
+                                    if (isMovingRight) -fullWidth / 3 else fullWidth / 3
+                                } + scaleOut(
+                                    animationSpec = ExpressivePhysics.fluidBouncy(),
+                                    targetScale = 0.88f
+                                ) + fadeOut(ExpressivePhysics.fluidBouncy())
                             )
                     },
                     label = "screen_route_transition",
@@ -86,8 +95,12 @@ fun GodouAppRoot(
                     }
                 }
 
-                // ── M3 Expressive Floating Bottom-Center Navigation Dock ──
+                // ── M3 Expressive Floating Continuous Sliding Dock ──
                 val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                val density = LocalDensity.current
+
+                var itemBounds by remember { mutableStateOf(mapOf<Int, Pair<Dp, Dp>>()) }
+
                 Surface(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -99,63 +112,96 @@ fun GodouAppRoot(
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
                     shadowElevation = 10.dp
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    Box(
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.CenterStart
                     ) {
-                        ScreenRoute.entries.forEach { route ->
-                            val isSelected = currentRoute == route
-                            val pillBg by animateColorAsState(
-                                targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                        // Continuous Sliding Active Pill Indicator
+                        val activeBounds = itemBounds[currentRoute.ordinal]
+                        if (activeBounds != null) {
+                            val indicatorX by animateDpAsState(
+                                targetValue = activeBounds.first,
                                 animationSpec = ExpressivePhysics.fluidBouncy(),
-                                label = "nav_pill_bg"
+                                label = "pill_x"
                             )
-                            val pillContentColor by animateColorAsState(
-                                targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                            val indicatorWidth by animateDpAsState(
+                                targetValue = activeBounds.second,
                                 animationSpec = ExpressivePhysics.fluidBouncy(),
-                                label = "nav_pill_content"
-                            )
-                            val scale by animateFloatAsState(
-                                targetValue = if (isSelected) 1.05f else 0.95f,
-                                animationSpec = ExpressivePhysics.fluidBouncy(),
-                                label = "nav_pill_scale"
+                                label = "pill_w"
                             )
 
-                            Surface(
-                                onClick = {
-                                    if (currentRoute != route) {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        currentRoute = route
-                                    }
-                                },
-                                shape = CircleShape,
-                                color = pillBg,
-                                contentColor = pillContentColor,
-                                modifier = Modifier.graphicsLayer {
-                                    scaleX = scale
-                                    scaleY = scale
-                                }
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = if (isSelected) route.selectedIcon else route.unselectedIcon,
-                                        contentDescription = route.title,
-                                        modifier = Modifier.size(20.dp),
-                                        tint = pillContentColor
+                            Box(
+                                modifier = Modifier
+                                    .offset(x = indicatorX)
+                                    .width(indicatorWidth)
+                                    .fillMaxHeight()
+                                    .background(
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        shape = CircleShape
                                     )
-                                    if (isSelected) {
-                                        Text(
-                                            text = route.title,
-                                            style = MaterialTheme.typography.labelMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = pillContentColor
+                            )
+                        }
+
+                        // Navigation Items Row
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            ScreenRoute.entries.forEach { route ->
+                                val isSelected = currentRoute == route
+                                val contentColor by animateColorAsState(
+                                    targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    animationSpec = ExpressivePhysics.fluidBouncy(),
+                                    label = "nav_item_content"
+                                )
+                                val iconScale by animateFloatAsState(
+                                    targetValue = if (isSelected) 1.15f else 1.0f,
+                                    animationSpec = ExpressivePhysics.fluidBouncy(),
+                                    label = "nav_item_icon_scale"
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .onGloballyPositioned { coords ->
+                                            val xDp = with(density) { coords.positionInParent().x.toDp() }
+                                            val wDp = with(density) { coords.size.width.toDp() }
+                                            val bounds = xDp to wDp
+                                            if (itemBounds[route.ordinal] != bounds) {
+                                                itemBounds = itemBounds + (route.ordinal to bounds)
+                                            }
+                                        }
+                                        .clickable {
+                                            if (currentRoute != route) {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                currentRoute = route
+                                            }
+                                        }
+                                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (isSelected) route.selectedIcon else route.unselectedIcon,
+                                            contentDescription = route.title,
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .graphicsLayer {
+                                                    scaleX = iconScale
+                                                    scaleY = iconScale
+                                                },
+                                            tint = contentColor
                                         )
+                                        if (isSelected) {
+                                            Text(
+                                                text = route.title,
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = contentColor
+                                            )
+                                        }
                                     }
                                 }
                             }
