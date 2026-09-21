@@ -7,7 +7,8 @@ enum class BackdropPattern {
     COCKPIT_STRIPES,
     WATER_RIPPLE,   // 朱塗り — horizontal sine-wave lines (still water)
     WEAVE_DOTS,     // 御神酒 — hexagonal honeycomb dot grid (barrel straw weave)
-    TEMPLE_JAALI;   // 🛕 स्थापत्य — Ancient Indian stone relief lattice grid
+    TEMPLE_JAALI,   // 🛕 स्थापत्य — Ancient Indian stone relief lattice grid
+    AGSL_LIQUID_AURORA; // 🌊 Android 17 Native AGSL Shader Liquid Aurora Mesh
 
     companion object {
         fun fromStorage(value: String?): BackdropPattern {
