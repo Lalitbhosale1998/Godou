@@ -37,6 +37,7 @@ fun SettingsScreen(
     viewModel: ThemeViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
 ) {
     val themeSettings = LocalThemeSettings.current
+    val context = LocalContext.current
     val studyPrefs by viewModel.studyPreferences.collectAsStateWithLifecycle()
     val systemDark = isSystemInDarkTheme()
     val isDark = themeSettings.darkThemePreference.isDark(systemDark)
@@ -323,7 +324,7 @@ fun SettingsScreen(
                             checked = studyPrefs.dailyReminderEnabled,
                             onCheckedChange = { enabled ->
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                viewModel.setDailyReminderEnabled(enabled)
+                                viewModel.setDailyReminderEnabled(enabled, context)
                             }
                         )
 
@@ -344,9 +345,8 @@ fun SettingsScreen(
                                     color = MaterialTheme.colorScheme.tertiaryContainer,
                                     modifier = Modifier.clickable {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        viewModel.setDailyReminderTime(
-                                            if (studyPrefs.dailyReminderTime == "20:00") "21:00" else "20:00"
-                                        )
+                                        val newTime = if (studyPrefs.dailyReminderTime == "20:00") "21:00" else "20:00"
+                                        viewModel.setDailyReminderTime(newTime, context)
                                     }
                                 ) {
                                     Row(

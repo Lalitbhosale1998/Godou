@@ -204,15 +204,25 @@ class ThemeViewModel @Inject constructor(
         }
     }
 
-    fun setDailyReminderEnabled(enabled: Boolean) {
+    fun setDailyReminderEnabled(enabled: Boolean, context: android.content.Context) {
         viewModelScope.launch {
             preferencesRepository.setDailyReminderEnabled(enabled)
+            val currentPrefs = studyPreferences.value
+            com.personal.godou.data.notification.StudyReminderScheduler.scheduleDailyReminder(
+                context, enabled, currentPrefs.dailyReminderTime
+            )
         }
     }
 
-    fun setDailyReminderTime(time: String) {
+    fun setDailyReminderTime(time: String, context: android.content.Context) {
         viewModelScope.launch {
             preferencesRepository.setDailyReminderTime(time)
+            val currentPrefs = studyPreferences.value
+            if (currentPrefs.dailyReminderEnabled) {
+                com.personal.godou.data.notification.StudyReminderScheduler.scheduleDailyReminder(
+                    context, true, time
+                )
+            }
         }
     }
 
