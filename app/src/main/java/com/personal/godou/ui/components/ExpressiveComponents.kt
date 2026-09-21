@@ -552,7 +552,7 @@ fun ExpressiveScrollableFab(
         label = "fab_width"
     )
 
-    val shape = SuperellipseShape(cornerRadiusDp = 28f)
+    val shape = CircleShape
 
     Surface(
         modifier = modifier
