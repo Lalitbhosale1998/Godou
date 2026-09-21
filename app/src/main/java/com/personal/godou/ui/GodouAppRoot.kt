@@ -105,7 +105,7 @@ fun GodouAppRoot(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = bottomInset + 16.dp)
-                        .height(56.dp)
+                        .height(48.dp)
                         .wrapContentWidth(),
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f),
@@ -113,7 +113,7 @@ fun GodouAppRoot(
                     shadowElevation = 10.dp
                 ) {
                     Box(
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 3.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
                         // Continuous Sliding Active Pill Indicator
@@ -145,7 +145,7 @@ fun GodouAppRoot(
                         // Navigation Items Row
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             ScreenRoute.entries.forEach { route ->
                                 val isSelected = currentRoute == route
@@ -155,7 +155,7 @@ fun GodouAppRoot(
                                     label = "nav_item_content"
                                 )
                                 val iconScale by animateFloatAsState(
-                                    targetValue = if (isSelected) 1.15f else 1.0f,
+                                    targetValue = if (isSelected) 1.1f else 1.0f,
                                     animationSpec = ExpressivePhysics.fluidBouncy(),
                                     label = "nav_item_icon_scale"
                                 )
@@ -176,7 +176,7 @@ fun GodouAppRoot(
                                                 currentRoute = route
                                             }
                                         }
-                                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                                        .padding(horizontal = 12.dp, vertical = 6.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Row(
