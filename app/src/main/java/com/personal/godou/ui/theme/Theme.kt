@@ -169,8 +169,8 @@ fun Modifier.expressiveBackground(
     pattern: BackdropPattern = BackdropPattern.NONE
 ): Modifier = this.composed {
     val primaryContainer = MaterialTheme.colorScheme.primaryContainer
+    val secondaryContainer = MaterialTheme.colorScheme.secondaryContainer
     val tertiaryContainer = MaterialTheme.colorScheme.tertiaryContainer
-    val surfaceContainer = MaterialTheme.colorScheme.surfaceContainerLowest
     val backgroundColor = MaterialTheme.colorScheme.background
 
     this.drawBehind {
@@ -180,22 +180,22 @@ fun Modifier.expressiveBackground(
             drawRect(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        primaryContainer.copy(alpha = 0.25f),
+                        primaryContainer.copy(alpha = 0.30f),
                         backgroundColor,
-                        tertiaryContainer.copy(alpha = 0.2f),
+                        tertiaryContainer.copy(alpha = 0.25f),
                         backgroundColor
                     )
                 )
             )
         } else {
-            // Light Mode: Smooth Full-Bleed Dynamic Monet Vertical Gradient Mesh (Zero Circles / Zero Hard Edges)
+            // Light Mode: Rich Monet Tonal Tint Wash (Zero White / Zero Stark Drop-off)
             drawRect(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        primaryContainer.copy(alpha = 0.22f),
-                        tertiaryContainer.copy(alpha = 0.15f),
-                        surfaceContainer,
-                        primaryContainer.copy(alpha = 0.12f)
+                        primaryContainer.copy(alpha = 0.28f),
+                        tertiaryContainer.copy(alpha = 0.22f),
+                        secondaryContainer.copy(alpha = 0.18f),
+                        primaryContainer.copy(alpha = 0.15f)
                     )
                 )
             )
