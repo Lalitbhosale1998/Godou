@@ -53,29 +53,34 @@ val LocalThemeSettings = staticCompositionLocalOf { ThemeSettings() }
 private fun getTypography(appFont: AppFont): Typography {
     val displayFontFamily = when (appFont) {
         AppFont.NUNITO -> NunitoFontFamily
-        AppFont.MONOSPACE -> FontFamily.Monospace
-        AppFont.SYSTEM_SANS -> FontFamily.SansSerif
-        AppFont.OUTFIT -> OutfitFontFamily
-        AppFont.PLAYFAIR -> PlayfairFontFamily
-        AppFont.GOOGLE_SANS_FLEX -> GoogleSansFlexFontFamily
-        AppFont.CLIMATE_CRISIS -> ClimateCrisisFontFamily
-        AppFont.LUCKIEST_GUY -> LuckiestGuyFontFamily
+        AppFont.NOTO_SANS_JP -> NotoSansJPFontFamily
+        AppFont.M_PLUS_1 -> MPlus1FontFamily
         AppFont.DELA_GOTHIC_ONE -> DelaGothicOneFontFamily
         AppFont.HACHI_MARU_POP -> HachiMaruPopFontFamily
+        AppFont.KAISEI_DECOL -> KaiseiDecolFontFamily
+        AppFont.KAISEI_OPTI -> KaiseiOptiFontFamily
         AppFont.KOSUGI_MARU -> KosugiMaruFontFamily
         AppFont.MOCHIY_POP_P_ONE -> MochiyPopPOneFontFamily
         AppFont.POTTA_ONE -> PottaOneFontFamily
         AppFont.RAMPART_ONE -> RampartOneFontFamily
+        AppFont.REGGAE_ONE -> ReggaeOneFontFamily
+        AppFont.ROCKNROLL_ONE -> RocknRollOneFontFamily
         AppFont.WDXL_LUBRIFONT_JPN -> WDXLLubrifontJPNFontFamily
+        AppFont.YUJI_MAI -> YujiMaiFontFamily
+        AppFont.YUSEI_MAGIC -> YuseiMagicFontFamily
+        AppFont.GOOGLE_SANS_FLEX -> GoogleSansFlexFontFamily
+        AppFont.OUTFIT -> OutfitFontFamily
+        AppFont.PLAYFAIR -> PlayfairFontFamily
+        AppFont.MONOSPACE -> FontFamily.Monospace
+        AppFont.SYSTEM_SANS -> FontFamily.SansSerif
     }
 
     val bodyFontFamily = displayFontFamily
 
     val isJapaneseFont = when (appFont) {
-        AppFont.DELA_GOTHIC_ONE, AppFont.HACHI_MARU_POP, AppFont.KOSUGI_MARU,
-        AppFont.MOCHIY_POP_P_ONE, AppFont.POTTA_ONE, AppFont.RAMPART_ONE,
-        AppFont.WDXL_LUBRIFONT_JPN -> true
-        else -> false
+        AppFont.NUNITO, AppFont.MONOSPACE, AppFont.SYSTEM_SANS,
+        AppFont.OUTFIT, AppFont.PLAYFAIR, AppFont.GOOGLE_SANS_FLEX -> false
+        else -> true
     }
 
     val wideTransform = if (isJapaneseFont) {
