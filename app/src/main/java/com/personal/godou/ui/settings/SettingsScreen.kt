@@ -31,7 +31,7 @@ import com.personal.godou.ui.theme.LocalThemeSettings
 import com.personal.godou.ui.theme.expressiveBackground
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: ThemeViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
@@ -47,6 +47,7 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
 
     var showResetDialog by remember { mutableStateOf(false) }
+    var showTimePickerDialog by remember { mutableStateOf(false) }
     var showImportSuccessSnackbar by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(showImportSuccessSnackbar) {
@@ -345,8 +346,7 @@ fun SettingsScreen(
                                     color = MaterialTheme.colorScheme.tertiaryContainer,
                                     modifier = Modifier.clickable {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        val newTime = if (studyPrefs.dailyReminderTime == "20:00") "21:00" else "20:00"
-                                        viewModel.setDailyReminderTime(newTime, context)
+                                        showTimePickerDialog = true
                                     }
                                 ) {
                                     Row(
@@ -496,6 +496,60 @@ fun SettingsScreen(
                     shape = CircleShape
                 ) {
                     Text("キャンセル")
+                }
+            },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    }
+
+    if (showTimePickerDialog) {
+        val initialHour = studyPrefs.dailyReminderTime.split(":").getOrNull(0)?.toIntOrNull() ?: 20
+        val initialMinute = studyPrefs.dailyReminderTime.split(":").getOrNull(1)?.toIntOrNull() ?: 0
+        val timePickerState = rememberTimePickerState(
+            initialHour = initialHour,
+            initialMinute = initialMinute,
+            is24Hour = true
+        )
+
+        AlertDialog(
+            onDismissRequest = { showTimePickerDialog = false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val formattedHour = timePickerState.hour.toString().padStart(2, '0')
+                        val formattedMinute = timePickerState.minute.toString().padStart(2, '0')
+                        val selectedTime = "$formattedHour:$formattedMinute"
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        viewModel.setDailyReminderTime(selectedTime, context)
+                        showTimePickerDialog = false
+                    },
+                    shape = CircleShape
+                ) {
+                    Text("設定する", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showTimePickerDialog = false },
+                    shape = CircleShape
+                ) {
+                    Text("キャンセル")
+                }
+            },
+            title = {
+                Text(
+                    text = "通知時刻を選択",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TimePicker(state = timePickerState)
                 }
             },
             shape = RoundedCornerShape(28.dp),
