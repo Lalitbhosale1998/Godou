@@ -1,6 +1,5 @@
 package com.personal.godou.ui.settings
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -60,7 +59,7 @@ fun SettingsScreen() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "SETTINGS",
+                text = "設定",
                 style = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -70,7 +69,7 @@ fun SettingsScreen() {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Blank Settings Screen",
+                text = "設定画面",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

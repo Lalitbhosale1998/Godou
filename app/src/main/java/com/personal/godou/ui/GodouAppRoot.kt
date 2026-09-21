@@ -44,9 +44,9 @@ enum class ScreenRoute(
     val unselectedIcon: ImageVector,
     val selectedIcon: ImageVector
 ) {
-    HOME("home", "Home", Icons.Outlined.Home, Icons.Filled.Home),
-    VOCAB("vocab", "Vocab", Icons.Outlined.Translate, Icons.Filled.Translate),
-    SETTINGS("settings", "Settings", Icons.Outlined.Settings, Icons.Filled.Settings)
+    HOME("home", "ホーム", Icons.Outlined.Home, Icons.Filled.Home),
+    VOCAB("vocab", "単語帳", Icons.Outlined.Translate, Icons.Filled.Translate),
+    SETTINGS("settings", "設定", Icons.Outlined.Settings, Icons.Filled.Settings)
 }
 
 @Composable

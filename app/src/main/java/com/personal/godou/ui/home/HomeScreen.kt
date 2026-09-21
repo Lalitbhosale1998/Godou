@@ -1,6 +1,5 @@
 package com.personal.godou.ui.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -60,7 +59,7 @@ fun HomeScreen() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "HOME",
+                text = "ホーム",
                 style = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -70,7 +69,7 @@ fun HomeScreen() {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Blank Home Screen",
+                text = "ホーム画面",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
