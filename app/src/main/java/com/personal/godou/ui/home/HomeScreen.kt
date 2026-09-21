@@ -202,13 +202,13 @@ fun ExpressiveStreakCard(
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(32.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(22.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             // Header Row: 🔥 Fire Badge & Count with Synchronized Spring Pulse
             Row(
@@ -218,13 +218,13 @@ fun ExpressiveStreakCard(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Surface(
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.tertiaryContainer,
                         modifier = Modifier
-                            .size(44.dp)
+                            .size(54.dp)
                             .graphicsLayer {
                                 scaleX = animatedFlameScale
                                 scaleY = animatedFlameScale
@@ -233,7 +233,7 @@ fun ExpressiveStreakCard(
                         Box(contentAlignment = Alignment.Center) {
                             Text(
                                 text = "🔥",
-                                style = MaterialTheme.typography.titleMedium
+                                fontSize = 26.sp
                             )
                         }
                     }
@@ -241,22 +241,23 @@ fun ExpressiveStreakCard(
                     Column {
                         Text(
                             text = "連続学習ストリーク",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Black,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = "素晴らしい集中力です！",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
 
                 Surface(
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(50.dp),
                     color = MaterialTheme.colorScheme.primaryContainer,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
                     modifier = Modifier.graphicsLayer {
                         scaleX = animatedFlameScale
                         scaleY = animatedFlameScale
@@ -264,8 +265,8 @@ fun ExpressiveStreakCard(
                 ) {
                     Text(
                         text = "🔥 ${streakDays}日連続",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
@@ -312,7 +313,7 @@ fun ExpressiveStreakCard(
                                 scaleX = scale
                                 scaleY = scale
                             }
-                            .clip(RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(20.dp))
                             .clickable {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 coroutineScope.launch {
@@ -324,19 +325,20 @@ fun ExpressiveStreakCard(
                                 }
                                 onToggleDay(index)
                             },
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(20.dp),
                         color = containerColor,
-                        border = if (isToday) BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary) else null
+                        border = if (isToday) BorderStroke(2.5.dp, MaterialTheme.colorScheme.tertiary) else null
                     ) {
                         Column(
-                            modifier = Modifier.padding(vertical = 10.dp),
+                            modifier = Modifier.padding(vertical = 14.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
                                 text = dayName,
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = if (isToday) FontWeight.Black else FontWeight.Bold,
+                                fontSize = 15.sp,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = if (isToday) FontWeight.Black else FontWeight.ExtraBold,
                                 color = contentColor
                             )
 
@@ -353,13 +355,13 @@ fun ExpressiveStreakCard(
                                         imageVector = Icons.Outlined.Check,
                                         contentDescription = "Completed",
                                         tint = contentColor,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(18.dp)
                                     )
                                 } else {
                                     Surface(
                                         shape = CircleShape,
-                                        color = contentColor.copy(alpha = 0.3f),
-                                        modifier = Modifier.size(6.dp)
+                                        color = contentColor.copy(alpha = 0.35f),
+                                        modifier = Modifier.size(8.dp)
                                     ) {}
                                 }
                             }
