@@ -2,6 +2,7 @@ package com.personal.godou.ui.settings
 
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -27,6 +28,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.personal.godou.data.preferences.*
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import com.personal.godou.ui.theme.ExpressivePhysics
 import com.personal.godou.ui.theme.LocalThemeSettings
 import com.personal.godou.ui.theme.expressiveBackground
 import kotlinx.coroutines.launch
@@ -169,7 +173,7 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                         )
 
-                        // App Theme Mode (System / Light / Dark)
+                        // App Theme Mode (System / Light / Dark) - Fluid Spring Sliding Segmented Control
                         Text(
                             text = "アプリテーマ",
                             style = MaterialTheme.typography.titleSmall,
@@ -177,31 +181,10 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            DarkThemePreference.entries.forEach { pref ->
-                                val isSelected = themeSettings.darkThemePreference == pref
-                                FilterChip(
-                                    selected = isSelected,
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        viewModel.setDarkThemePreference(pref)
-                                    },
-                                    label = { Text(pref.label, fontSize = 12.sp) },
-                                    leadingIcon = if (isSelected) {
-                                        { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
-                                    } else null,
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        containerColor = Color.Transparent,
-                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                    ),
-                                    shape = CircleShape
-                                )
-                            }
-                        }
+                        ExpressiveThemeSegmentedControl(
+                            selectedPref = themeSettings.darkThemePreference,
+                            onPrefSelected = { pref -> viewModel.setDarkThemePreference(pref) }
+                        )
 
                         HorizontalDivider(
                             modifier = Modifier.padding(vertical = 12.dp),
@@ -721,5 +704,95 @@ private fun SettingsSwitchRow(
                 checkedTrackColor = MaterialTheme.colorScheme.primary
             )
         )
+    }
+}
+
+@Composable
+private fun ExpressiveThemeSegmentedControl(
+    selectedPref: DarkThemePreference,
+    onPrefSelected: (DarkThemePreference) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val haptic = LocalHapticFeedback.current
+    val entries = DarkThemePreference.entries
+    val selectedIndex = entries.indexOf(selectedPref)
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp),
+        shape = CircleShape,
+        color = Color.Transparent,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+    ) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(3.dp)
+        ) {
+            val segmentWidth = maxWidth / entries.size
+            val indicatorOffset by animateDpAsState(
+                targetValue = segmentWidth * selectedIndex,
+                animationSpec = ExpressivePhysics.fluidBouncy(),
+                label = "theme_indicator_offset"
+            )
+
+            // Continuous Sliding Active Pill
+            Box(
+                modifier = Modifier
+                    .offset(x = indicatorOffset)
+                    .width(segmentWidth)
+                    .fillMaxHeight()
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+            )
+
+            // Interactive Row
+            Row(modifier = Modifier.fillMaxSize()) {
+                entries.forEach { pref ->
+                    val isSelected = selectedPref == pref
+                    val contentColor by animateColorAsState(
+                        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                        animationSpec = ExpressivePhysics.fluidBouncy(),
+                        label = "theme_text_color"
+                    )
+                    val icon = when (pref) {
+                        DarkThemePreference.SYSTEM -> Icons.Outlined.Smartphone
+                        DarkThemePreference.LIGHT -> Icons.Outlined.LightMode
+                        DarkThemePreference.DARK -> Icons.Outlined.DarkMode
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(CircleShape)
+                            .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onPrefSelected(pref)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = contentColor,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = pref.label,
+                                fontSize = 12.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = contentColor
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
