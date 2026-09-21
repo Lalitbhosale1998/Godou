@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import com.personal.godou.ui.theme.ExpressivePhysics
 import com.personal.godou.ui.theme.LocalThemeSettings
 import com.personal.godou.ui.theme.expressiveBackground
+import com.personal.godou.ui.about.ExpressiveAboutSheet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -52,6 +53,7 @@ fun SettingsScreen(
 
     var showResetDialog by remember { mutableStateOf(false) }
     var showTimePickerDialog by remember { mutableStateOf(false) }
+    var showAboutSheet by remember { mutableStateOf(false) }
     var showImportSuccessSnackbar by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(showImportSuccessSnackbar) {
@@ -508,9 +510,52 @@ fun SettingsScreen(
                                 Text("設定のリセット・キャッシュ消去", fontWeight = FontWeight.Bold)
                             }
                         }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // About Godou App Info Card
+                        OutlinedButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                showAboutSheet = true
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(Icons.Outlined.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                                Text("アプリについて (About Godou 語道)", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                            }
+                        }
                     }
                 }
             }
+        }
+    }
+
+    // ── Expressive About Bottom Sheet ──
+    if (showAboutSheet) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = { showAboutSheet = false },
+            sheetState = sheetState,
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            containerColor = if (isDark) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerHigh,
+            dragHandle = {
+                Surface(
+                    modifier = Modifier.padding(top = 10.dp, bottom = 4.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                ) {
+                    Box(modifier = Modifier.size(width = 36.dp, height = 5.dp))
+                }
+            }
+        ) {
+            ExpressiveAboutSheet(onDismiss = { showAboutSheet = false })
         }
     }
 
