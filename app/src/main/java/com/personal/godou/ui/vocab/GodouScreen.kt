@@ -140,7 +140,7 @@ fun GodouScreen(
         ) {
             Scaffold(
                 containerColor = Color.Transparent,
-                contentWindowInsets = WindowInsets.safeDrawing,
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
                 topBar = {},
                 floatingActionButton = {
                     if (selectedVocabEntry == null) {
@@ -157,18 +157,19 @@ fun GodouScreen(
                         )
                     }
                 }
-            ) { innerPadding ->
+            ) { _ ->
+                val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                val bottomScrollPadding = navBottom + 140.dp
+
                 AnimatedVisibility(visible = true) {
                     val rootAnimatedVisibilityScope = this
                     Box(modifier = Modifier.fillMaxSize()) {
                         // ── Main Curriculum / List View (Always Mounted) ──
                         Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding)
+                            modifier = Modifier.fillMaxSize()
                         ) {
-                            val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                            Spacer(modifier = Modifier.height(statusBarPadding + 72.dp))
+                            Spacer(modifier = Modifier.height(statusBarTop + 8.dp))
 
                             val searchBarBgColor = MaterialTheme.colorScheme.surfaceContainerHigh
 
@@ -229,7 +230,7 @@ fun GodouScreen(
                                     LazyColumn(
                                         state = lazyListState,
                                         modifier = Modifier.fillMaxSize(),
-                                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = innerPadding.calculateBottomPadding() + 130.dp),
+                                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = bottomScrollPadding),
                                         verticalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
                                         items(filteredEntries, key = { it.id }) { entry ->
@@ -309,7 +310,7 @@ fun GodouScreen(
                                                 LazyColumn(
                                                     state = lazyListState,
                                                     modifier = Modifier.fillMaxSize(),
-                                                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = innerPadding.calculateBottomPadding() + 130.dp),
+                                                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = bottomScrollPadding),
                                                     verticalArrangement = Arrangement.spacedBy(12.dp)
                                                 ) {
                                                     items(starredEntries, key = { it.id }) { entry ->
@@ -402,7 +403,7 @@ fun GodouScreen(
                                             LazyColumn(
                                                 state = lazyListState,
                                                 modifier = Modifier.fillMaxSize(),
-                                                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = innerPadding.calculateBottomPadding() + 130.dp),
+                                                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = bottomScrollPadding),
                                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                                             ) {
                                                 // ── ACTIVE FOCUS WEEK CARD (ORGANIC LAYERED HERO) ──
@@ -884,7 +885,7 @@ fun GodouScreen(
                                                         LazyColumn(
                                                             state = lazyListState,
                                                             modifier = Modifier.fillMaxSize(),
-                                                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = innerPadding.calculateBottomPadding() + 130.dp),
+                                                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = bottomScrollPadding),
                                                             verticalArrangement = Arrangement.spacedBy(12.dp)
                                                         ) {
                                                             items(finalFilteredDayEntries, key = { it.id }) { entry ->
