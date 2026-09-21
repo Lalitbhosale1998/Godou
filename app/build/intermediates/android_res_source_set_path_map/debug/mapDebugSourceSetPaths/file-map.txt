@@ -1,8 +1,0 @@
-com.personal.godou.app-pngs-0 D:\Android_Project\Godou\app\build\generated\res\pngs\debug
-com.personal.godou.app-updated_navigation_xml-1 D:\Android_Project\Godou\app\build\generated\updated_navigation_xml\debug
-com.personal.godou.app-debug-2 D:\Android_Project\Godou\app\build\intermediates\generated_locale_config_incremental_dir\debug\generateDebugLocaleConfig
-com.personal.godou.app-packageDebugResources-3 D:\Android_Project\Godou\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.personal.godou.app-packageDebugResources-4 D:\Android_Project\Godou\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.personal.godou.app-debug-5 D:\Android_Project\Godou\app\build\intermediates\merged_res\debug\mergeDebugResources
-com.personal.godou.app-debug-6 D:\Android_Project\Godou\app\src\debug\res
-com.personal.godou.app-main-7 D:\Android_Project\Godou\app\src\main\res

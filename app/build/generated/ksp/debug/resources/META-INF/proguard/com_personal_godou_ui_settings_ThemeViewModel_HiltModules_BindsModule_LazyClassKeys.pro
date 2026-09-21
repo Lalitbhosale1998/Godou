@@ -1,1 +1,0 @@
--keep,allowobfuscation,allowshrinking class com.personal.godou.ui.settings.ThemeViewModel
