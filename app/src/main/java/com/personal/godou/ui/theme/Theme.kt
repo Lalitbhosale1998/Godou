@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Paint
@@ -166,9 +167,39 @@ fun Modifier.expressiveBackground(
     primaryColor: Color = Color.Unspecified,
     containerColor: Color = Color.Unspecified,
     pattern: BackdropPattern = BackdropPattern.NONE
-): Modifier = this.drawBehind {
-    if (containerColor != Color.Unspecified) {
-        drawRect(color = containerColor)
+): Modifier = this.composed {
+    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
+    val tertiaryContainer = MaterialTheme.colorScheme.tertiaryContainer
+    val surfaceContainer = MaterialTheme.colorScheme.surfaceContainerLowest
+    val backgroundColor = MaterialTheme.colorScheme.background
+
+    this.drawBehind {
+        if (containerColor != Color.Unspecified) {
+            drawRect(color = containerColor)
+        } else if (isDark) {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        primaryContainer.copy(alpha = 0.25f),
+                        backgroundColor,
+                        tertiaryContainer.copy(alpha = 0.2f),
+                        backgroundColor
+                    )
+                )
+            )
+        } else {
+            // Light Mode: Smooth Full-Bleed Dynamic Monet Vertical Gradient Mesh (Zero Circles / Zero Hard Edges)
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        primaryContainer.copy(alpha = 0.22f),
+                        tertiaryContainer.copy(alpha = 0.15f),
+                        surfaceContainer,
+                        primaryContainer.copy(alpha = 0.12f)
+                    )
+                )
+            )
+        }
     }
 }
 
