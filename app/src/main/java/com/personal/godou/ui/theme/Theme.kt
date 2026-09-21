@@ -36,6 +36,7 @@ import com.personal.godou.data.preferences.BackdropPattern
 import com.personal.godou.data.preferences.GlowIntensity
 import com.personal.godou.data.preferences.ThemeSettings
 import com.personal.godou.data.preferences.TouchSynesthesia
+import com.personal.godou.data.preferences.StudyPreferences
 
 object ExpressivePhysics {
     fun <T> fluidSnappy() = spring<T>(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
@@ -191,6 +192,8 @@ fun GodouTheme(
     }
 }
 
+val LocalStudyPreferences = staticCompositionLocalOf { StudyPreferences() }
+
 @Composable
 fun ThemeSettingsProvider(
     themeSettings: ThemeSettings,
@@ -199,6 +202,17 @@ fun ThemeSettingsProvider(
     GodouTheme(
         darkTheme = themeSettings.darkThemePreference.isDark(isSystemInDarkTheme()),
         themeSettings = themeSettings,
+        content = content
+    )
+}
+
+@Composable
+fun StudySettingsProvider(
+    studyPreferences: StudyPreferences,
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalStudyPreferences provides studyPreferences,
         content = content
     )
 }

@@ -52,6 +52,9 @@ import com.personal.godou.ui.components.CookieShape
 import com.personal.godou.ui.components.rememberExpressiveCardShape
 import com.personal.godou.ui.theme.ExpressiveMotion
 import com.personal.godou.ui.theme.ExpressivePhysics
+import com.personal.godou.data.preferences.DeckOrder
+import com.personal.godou.data.preferences.FuriganaMode
+import com.personal.godou.ui.theme.LocalStudyPreferences
 import com.personal.godou.ui.theme.LocalThemeSettings
 import com.personal.godou.ui.theme.expressiveBackground
 import com.personal.godou.ui.theme.getAppStrings
@@ -68,6 +71,16 @@ fun GodouScreen(
 
     val allEntries by viewModel.allEntries.collectAsState()
     val filteredEntries by viewModel.filteredEntries.collectAsState()
+    val studyPrefs = LocalStudyPreferences.current
+
+    val sortedEntries = remember(filteredEntries, studyPrefs.deckOrder) {
+        when (studyPrefs.deckOrder) {
+            DeckOrder.SHUFFLE -> filteredEntries.shuffled()
+            DeckOrder.DIFFICULTY -> filteredEntries.sortedByDescending { it.id % 5 }
+            DeckOrder.DUE_DATE -> filteredEntries.sortedBy { it.id }
+            DeckOrder.NEWEST_FIRST -> filteredEntries.sortedByDescending { it.id }
+        }
+    }
     val categories by viewModel.availableCategories.collectAsState()
     val subCategories by viewModel.availableSubCategories.collectAsState()
     val studyTags by viewModel.availableStudyTags.collectAsState()
@@ -235,7 +248,7 @@ fun GodouScreen(
                                         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = bottomScrollPadding),
                                         verticalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
-                                        items(filteredEntries, key = { it.id }) { entry ->
+                                        items(sortedEntries, key = { it.id }) { entry ->
                                             VocabCardItem(
                                                 entry = entry,
                                                 onClickCard = { selectedVocabEntry = entry },
@@ -977,6 +990,15 @@ fun VocabCardItem(
     val haptic = LocalHapticFeedback.current
 
     val themeSettings = LocalThemeSettings.current
+    val studyPrefs = LocalStudyPreferences.current
+    var isFuriganaRevealed by remember { mutableStateOf(false) }
+
+    val showFurigana = when (studyPrefs.furiganaMode) {
+        FuriganaMode.ALWAYS_SHOW -> true
+        FuriganaMode.HIDE_TAP_TO_REVEAL -> isFuriganaRevealed
+        FuriganaMode.ADAPT_JLPT -> entry.studyTag.contains("N1") || entry.studyTag.contains("N2")
+    }
+
     val cardBgColor = if (entry.isMastered) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerHighest
 
     var isPressed by remember { mutableStateOf(false) }
@@ -1038,12 +1060,25 @@ fun VocabCardItem(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     if (entry.furiganaReading.isNotBlank()) {
-                        Text(
-                            text = entry.furiganaReading,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                        if (showFurigana) {
+                            Text(
+                                text = entry.furiganaReading,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = if (studyPrefs.furiganaMode == FuriganaMode.HIDE_TAP_TO_REVEAL) {
+                                    Modifier.clickable { isFuriganaRevealed = false }
+                                } else Modifier
+                            )
+                        } else {
+                            Text(
+                                text = "•••",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.clickable { isFuriganaRevealed = true }
+                            )
+                        }
                     }
                     Text(
                         text = entry.kanjiWord,
@@ -1051,6 +1086,14 @@ fun VocabCardItem(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+                    if (studyPrefs.showRomaji && entry.furiganaReading.isNotBlank()) {
+                        Text(
+                            text = "[${kanaToRomaji(entry.furiganaReading)}]",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1193,6 +1236,15 @@ fun ExpressiveVocabDetailView(
         MaterialTheme.colorScheme.surfaceContainerLowest
     }
 
+    val studyPrefs = LocalStudyPreferences.current
+    var isDetailFuriganaRevealed by remember { mutableStateOf(false) }
+
+    val showDetailFurigana = when (studyPrefs.furiganaMode) {
+        FuriganaMode.ALWAYS_SHOW -> true
+        FuriganaMode.HIDE_TAP_TO_REVEAL -> isDetailFuriganaRevealed
+        FuriganaMode.ADAPT_JLPT -> entry.studyTag.contains("N1") || entry.studyTag.contains("N2")
+    }
+
     var isDismissing by remember { mutableStateOf(false) }
     val predictiveScale by animateFloatAsState(
         targetValue = if (isDismissing) 0.92f else 1.0f,
@@ -1251,6 +1303,7 @@ fun ExpressiveVocabDetailView(
                 ) {
                     IconButton(onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        isDismissing = true
                         onClose()
                     }) {
                         Icon(Icons.Default.Close, contentDescription = "Close")
@@ -1298,14 +1351,29 @@ fun ExpressiveVocabDetailView(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     if (entry.furiganaReading.isNotBlank()) {
-                        Text(
-                            text = entry.furiganaReading,
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 2.sp,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
+                        if (showDetailFurigana) {
+                            Text(
+                                text = entry.furiganaReading,
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 2.sp,
+                                modifier = (if (studyPrefs.furiganaMode == FuriganaMode.HIDE_TAP_TO_REVEAL) {
+                                    Modifier.clickable { isDetailFuriganaRevealed = false }
+                                } else Modifier).padding(bottom = 4.dp)
+                            )
+                        } else {
+                            Text(
+                                text = "•••",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 4.sp,
+                                modifier = Modifier
+                                    .clickable { isDetailFuriganaRevealed = true }
+                                    .padding(bottom = 4.dp)
+                            )
+                        }
                     }
 
                     Box(contentAlignment = Alignment.TopEnd) {
@@ -1886,6 +1954,31 @@ fun ExpressiveVocabAddSheet(
                     fontWeight = FontWeight.Bold
                 )
             }
+        }
+    }
+}
+
+private fun kanaToRomaji(kana: String): String {
+    val map = mapOf(
+        'あ' to "a", 'い' to "i", 'う' to "u", 'え' to "e", 'お' to "o",
+        'か' to "ka", 'き' to "ki", 'く' to "ku", 'け' to "ke", 'こ' to "ko",
+        'さ' to "sa", 'し' to "shi", 'す' to "su", 'せ' to "se", 'そ' to "so",
+        'た' to "ta", 'ち' to "chi", 'つ' to "tsu", 'て' to "te", 'と' to "to",
+        'な' to "na", 'に' to "ni", 'ぬ' to "nu", 'ね' to "ne", 'の' to "no",
+        'は' to "ha", 'ひ' to "hi", 'ふ' to "fu", 'へ' to "he", 'ほ' to "ho",
+        'ま' to "ma", 'み' to "mi", 'む' to "mu", 'め' to "me", 'も' to "mo",
+        'や' to "ya", 'ゆ' to "yu", 'よ' to "yo",
+        'ら' to "ra", 'り' to "ri", 'る' to "ru", 'れ' to "re", 'ろ' to "ro",
+        'わ' to "wa", 'を' to "wo", 'ん' to "n", 'が' to "ga", 'ぎ' to "gi",
+        'ぐ' to "gu", 'げ' to "ge", 'ご' to "go", 'ざ' to "za", 'じ' to "ji",
+        'ず' to "zu", 'ぜ' to "ze", 'ぞ' to "zo", 'だ' to "da", 'ぢ' to "ji",
+        'づ' to "zu", 'で' to "de", 'ど' to "do", 'ば' to "ba", 'び' to "bi",
+        'ぶ' to "bu", 'べ' to "be", 'ぼ' to "bo", 'ぱ' to "pa", 'ぴ' to "pi",
+        'ぷ' to "pu", 'ぺ' to "pe", 'ぽ' to "po"
+    )
+    return buildString {
+        for (ch in kana) {
+            append(map[ch] ?: ch)
         }
     }
 }

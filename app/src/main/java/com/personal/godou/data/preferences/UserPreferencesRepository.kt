@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -27,6 +28,15 @@ private object Keys {
     val THEME_FLAVOR = stringPreferencesKey("theme_flavor")
     val DYNAMIC_COLOR_CHROMA_SCALE = floatPreferencesKey("dynamic_color_chroma_scale")
     val IS_SETUP_COMPLETE = booleanPreferencesKey("is_setup_complete")
+
+    // Study & Typography Preference Keys
+    val FURIGANA_MODE = stringPreferencesKey("furigana_mode")
+    val SHOW_ROMAJI = booleanPreferencesKey("show_romaji")
+    val DAILY_GOAL_WORDS = intPreferencesKey("daily_goal_words")
+    val SRS_ALGORITHM = stringPreferencesKey("srs_algorithm")
+    val DECK_ORDER = stringPreferencesKey("deck_order")
+    val DAILY_REMINDER_ENABLED = booleanPreferencesKey("daily_reminder_enabled")
+    val DAILY_REMINDER_TIME = stringPreferencesKey("daily_reminder_time")
 }
 
 @Singleton
@@ -53,6 +63,18 @@ class UserPreferencesRepository @Inject constructor(
             themeFlavor = ThemeFlavor.fromStorage(prefs[Keys.THEME_FLAVOR]),
             dynamicColorChromaScale = prefs[Keys.DYNAMIC_COLOR_CHROMA_SCALE] ?: 1.0f,
             isSetupComplete = prefs[Keys.IS_SETUP_COMPLETE] ?: true
+        )
+    }
+
+    val studyPreferences: Flow<StudyPreferences> = dataStore.data.map { prefs ->
+        StudyPreferences(
+            furiganaMode = FuriganaMode.fromStorage(prefs[Keys.FURIGANA_MODE]),
+            showRomaji = prefs[Keys.SHOW_ROMAJI] ?: false,
+            dailyGoalWords = prefs[Keys.DAILY_GOAL_WORDS] ?: 4,
+            srsAlgorithm = SrsAlgorithm.fromStorage(prefs[Keys.SRS_ALGORITHM]),
+            deckOrder = DeckOrder.fromStorage(prefs[Keys.DECK_ORDER]),
+            dailyReminderEnabled = prefs[Keys.DAILY_REMINDER_ENABLED] ?: true,
+            dailyReminderTime = prefs[Keys.DAILY_REMINDER_TIME] ?: "20:00"
         )
     }
 
@@ -114,5 +136,38 @@ class UserPreferencesRepository @Inject constructor(
 
     suspend fun setSetupComplete(completed: Boolean) {
         dataStore.edit { it[Keys.IS_SETUP_COMPLETE] = completed }
+    }
+
+    // ── Study Preference Updaters ──
+    suspend fun setFuriganaMode(mode: FuriganaMode) {
+        dataStore.edit { it[Keys.FURIGANA_MODE] = mode.name }
+    }
+
+    suspend fun setShowRomaji(enabled: Boolean) {
+        dataStore.edit { it[Keys.SHOW_ROMAJI] = enabled }
+    }
+
+    suspend fun setDailyGoalWords(count: Int) {
+        dataStore.edit { it[Keys.DAILY_GOAL_WORDS] = count }
+    }
+
+    suspend fun setSrsAlgorithm(algo: SrsAlgorithm) {
+        dataStore.edit { it[Keys.SRS_ALGORITHM] = algo.name }
+    }
+
+    suspend fun setDeckOrder(order: DeckOrder) {
+        dataStore.edit { it[Keys.DECK_ORDER] = order.name }
+    }
+
+    suspend fun setDailyReminderEnabled(enabled: Boolean) {
+        dataStore.edit { it[Keys.DAILY_REMINDER_ENABLED] = enabled }
+    }
+
+    suspend fun setDailyReminderTime(time: String) {
+        dataStore.edit { it[Keys.DAILY_REMINDER_TIME] = time }
+    }
+
+    suspend fun resetAllSettings() {
+        dataStore.edit { it.clear() }
     }
 }

@@ -19,11 +19,13 @@ import com.personal.godou.data.preferences.ThemeSettings
 import com.personal.godou.data.preferences.DynamicTonalStyle
 import com.personal.godou.data.preferences.ColorIntensityPreset
 import com.personal.godou.data.preferences.UserPreferencesRepository
+import com.personal.godou.data.preferences.StudyPreferences
+import com.personal.godou.data.preferences.FuriganaMode
+import com.personal.godou.data.preferences.SrsAlgorithm
+import com.personal.godou.data.preferences.DeckOrder
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -54,6 +56,13 @@ class ThemeViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = ThemeSettings()
+        )
+
+    val studyPreferences: StateFlow<StudyPreferences> = preferencesRepository.studyPreferences
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = StudyPreferences()
         )
 
     fun setDarkThemePreference(value: DarkThemePreference) {
@@ -103,7 +112,6 @@ class ThemeViewModel @Inject constructor(
             preferencesRepository.setThemeFlavor(flavor)
         }
     }
-
 
     fun setDynamicColorChromaScale(scale: Float) {
         viewModelScope.launch {
@@ -162,6 +170,55 @@ class ThemeViewModel @Inject constructor(
     fun setTouchSynesthesia(synesthesia: TouchSynesthesia) {
         viewModelScope.launch {
             preferencesRepository.setTouchSynesthesia(synesthesia)
+        }
+    }
+
+    // ── Study Preference Updaters ──
+    fun setFuriganaMode(mode: FuriganaMode) {
+        viewModelScope.launch {
+            preferencesRepository.setFuriganaMode(mode)
+        }
+    }
+
+    fun setShowRomaji(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setShowRomaji(enabled)
+        }
+    }
+
+    fun setDailyGoalWords(count: Int) {
+        viewModelScope.launch {
+            preferencesRepository.setDailyGoalWords(count)
+        }
+    }
+
+    fun setSrsAlgorithm(algo: SrsAlgorithm) {
+        viewModelScope.launch {
+            preferencesRepository.setSrsAlgorithm(algo)
+        }
+    }
+
+    fun setDeckOrder(order: DeckOrder) {
+        viewModelScope.launch {
+            preferencesRepository.setDeckOrder(order)
+        }
+    }
+
+    fun setDailyReminderEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setDailyReminderEnabled(enabled)
+        }
+    }
+
+    fun setDailyReminderTime(time: String) {
+        viewModelScope.launch {
+            preferencesRepository.setDailyReminderTime(time)
+        }
+    }
+
+    fun resetAllSettings() {
+        viewModelScope.launch {
+            preferencesRepository.resetAllSettings()
         }
     }
 }

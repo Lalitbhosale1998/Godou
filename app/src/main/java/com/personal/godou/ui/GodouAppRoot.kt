@@ -2,6 +2,7 @@ package com.personal.godou.ui
 
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.*
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
@@ -37,6 +38,7 @@ import com.personal.godou.ui.home.HomeScreen
 import com.personal.godou.ui.settings.SettingsScreen
 import com.personal.godou.ui.settings.ThemeViewModel
 import com.personal.godou.ui.theme.ExpressivePhysics
+import com.personal.godou.ui.theme.StudySettingsProvider
 import com.personal.godou.ui.theme.ThemeSettingsProvider
 import com.personal.godou.ui.vocab.GodouScreen
 
@@ -56,151 +58,154 @@ fun GodouAppRoot(
     viewModel: ThemeViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
 ) {
     val themeSettings by viewModel.themeSettings.collectAsStateWithLifecycle()
+    val studyPreferences by viewModel.studyPreferences.collectAsStateWithLifecycle()
     var currentRoute by remember { mutableStateOf(ScreenRoute.VOCAB) }
     val haptic = LocalHapticFeedback.current
 
     ThemeSettingsProvider(themeSettings = themeSettings) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                // ── Screen Content with M3 Expressive Shared-Axis Transition ──
-                AnimatedContent(
-                    targetState = currentRoute,
-                    transitionSpec = {
-                        val isMovingRight = targetState.ordinal > initialState.ordinal
-                        (slideInHorizontally(ExpressivePhysics.fluidBouncy()) { fullWidth ->
-                            if (isMovingRight) fullWidth else -fullWidth
-                        } + scaleIn(
-                            animationSpec = ExpressivePhysics.fluidBouncy(),
-                            initialScale = 0.88f
-                        ) + fadeIn(ExpressivePhysics.fluidBouncy()))
-                            .togetherWith(
-                                slideOutHorizontally(ExpressivePhysics.fluidBouncy()) { fullWidth ->
-                                    if (isMovingRight) -fullWidth / 3 else fullWidth / 3
-                                } + scaleOut(
-                                    animationSpec = ExpressivePhysics.fluidBouncy(),
-                                    targetScale = 0.88f
-                                ) + fadeOut(ExpressivePhysics.fluidBouncy())
-                            )
-                    },
-                    label = "screen_route_transition",
-                    modifier = Modifier.fillMaxSize()
-                ) { targetScreen ->
-                    when (targetScreen) {
-                        ScreenRoute.HOME -> HomeScreen()
-                        ScreenRoute.VOCAB -> GodouScreen()
-                        ScreenRoute.SETTINGS -> SettingsScreen()
-                    }
-                }
-
-                // ── M3 Expressive Floating Continuous Sliding Dock ──
-                val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                val density = LocalDensity.current
-
-                var itemBounds by remember { mutableStateOf(mapOf<Int, Pair<Dp, Dp>>()) }
-
-                Surface(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = bottomInset + 16.dp)
-                        .height(48.dp)
-                        .wrapContentWidth(),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
-                    shadowElevation = 10.dp
-                ) {
-                    Box(
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 3.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        // Continuous Sliding Active Pill Indicator
-                        val activeBounds = itemBounds[currentRoute.ordinal]
-                        if (activeBounds != null) {
-                            val indicatorX by animateDpAsState(
-                                targetValue = activeBounds.first,
+        StudySettingsProvider(studyPreferences = studyPreferences) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // ── Screen Content with M3 Expressive Shared-Axis Transition ──
+                    AnimatedContent(
+                        targetState = currentRoute,
+                        transitionSpec = {
+                            val isMovingRight = targetState.ordinal > initialState.ordinal
+                            (slideInHorizontally(ExpressivePhysics.fluidBouncy()) { fullWidth ->
+                                if (isMovingRight) fullWidth else -fullWidth
+                            } + scaleIn(
                                 animationSpec = ExpressivePhysics.fluidBouncy(),
-                                label = "pill_x"
-                            )
-                            val indicatorWidth by animateDpAsState(
-                                targetValue = activeBounds.second,
-                                animationSpec = ExpressivePhysics.fluidBouncy(),
-                                label = "pill_w"
-                            )
-
-                            Box(
-                                modifier = Modifier
-                                    .offset(x = indicatorX)
-                                    .width(indicatorWidth)
-                                    .fillMaxHeight()
-                                    .background(
-                                        color = MaterialTheme.colorScheme.primaryContainer,
-                                        shape = CircleShape
-                                    )
-                            )
-                        }
-
-                        // Navigation Items Row
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            ScreenRoute.entries.forEach { route ->
-                                val isSelected = currentRoute == route
-                                val contentColor by animateColorAsState(
-                                    targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    animationSpec = ExpressivePhysics.fluidBouncy(),
-                                    label = "nav_item_content"
+                                initialScale = 0.88f
+                            ) + fadeIn(ExpressivePhysics.fluidBouncy()))
+                                .togetherWith(
+                                    slideOutHorizontally(ExpressivePhysics.fluidBouncy()) { fullWidth ->
+                                        if (isMovingRight) -fullWidth / 3 else fullWidth / 3
+                                    } + scaleOut(
+                                        animationSpec = ExpressivePhysics.fluidBouncy(),
+                                        targetScale = 0.88f
+                                    ) + fadeOut(ExpressivePhysics.fluidBouncy())
                                 )
-                                val iconScale by animateFloatAsState(
-                                    targetValue = if (isSelected) 1.1f else 1.0f,
+                        },
+                        label = "screen_route_transition",
+                        modifier = Modifier.fillMaxSize()
+                    ) { targetScreen ->
+                        when (targetScreen) {
+                            ScreenRoute.HOME -> HomeScreen()
+                            ScreenRoute.VOCAB -> GodouScreen()
+                            ScreenRoute.SETTINGS -> SettingsScreen()
+                        }
+                    }
+
+                    // ── M3 Expressive Floating Continuous Sliding Dock ──
+                    val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                    val density = LocalDensity.current
+
+                    var itemBounds by remember { mutableStateOf(mapOf<Int, Pair<Dp, Dp>>()) }
+
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = bottomInset + 16.dp)
+                            .height(56.dp)
+                            .wrapContentWidth(),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                        shadowElevation = 10.dp
+                    ) {
+                        Box(
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            // Continuous Sliding Active Pill Indicator
+                            val activeBounds = itemBounds[currentRoute.ordinal]
+                            if (activeBounds != null) {
+                                val indicatorX by animateDpAsState(
+                                    targetValue = activeBounds.first,
                                     animationSpec = ExpressivePhysics.fluidBouncy(),
-                                    label = "nav_item_icon_scale"
+                                    label = "pill_x"
+                                )
+                                val indicatorWidth by animateDpAsState(
+                                    targetValue = activeBounds.second,
+                                    animationSpec = ExpressivePhysics.fluidBouncy(),
+                                    label = "pill_w"
                                 )
 
                                 Box(
                                     modifier = Modifier
-                                        .onGloballyPositioned { coords ->
-                                            val xDp = with(density) { coords.positionInParent().x.toDp() }
-                                            val wDp = with(density) { coords.size.width.toDp() }
-                                            val bounds = xDp to wDp
-                                            if (itemBounds[route.ordinal] != bounds) {
-                                                itemBounds = itemBounds + (route.ordinal to bounds)
-                                            }
-                                        }
-                                        .clickable {
-                                            if (currentRoute != route) {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                currentRoute = route
-                                            }
-                                        }
-                                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = if (isSelected) route.selectedIcon else route.unselectedIcon,
-                                            contentDescription = route.title,
-                                            modifier = Modifier
-                                                .size(20.dp)
-                                                .graphicsLayer {
-                                                    scaleX = iconScale
-                                                    scaleY = iconScale
-                                                },
-                                            tint = contentColor
+                                        .offset(x = indicatorX)
+                                        .width(indicatorWidth)
+                                        .fillMaxHeight()
+                                        .background(
+                                            color = MaterialTheme.colorScheme.primaryContainer,
+                                            shape = CircleShape
                                         )
-                                        if (isSelected) {
-                                            Text(
-                                                text = route.title,
-                                                style = MaterialTheme.typography.labelMedium,
-                                                fontWeight = FontWeight.Bold,
-                                                color = contentColor
+                                )
+                            }
+
+                            // Navigation Items Row
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                ScreenRoute.entries.forEach { route ->
+                                    val isSelected = currentRoute == route
+                                    val contentColor by animateColorAsState(
+                                        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        animationSpec = ExpressivePhysics.fluidBouncy(),
+                                        label = "nav_item_content"
+                                    )
+                                    val iconScale by animateFloatAsState(
+                                        targetValue = if (isSelected) 1.15f else 1.0f,
+                                        animationSpec = ExpressivePhysics.fluidBouncy(),
+                                        label = "nav_item_icon_scale"
+                                    )
+
+                                    Box(
+                                        modifier = Modifier
+                                            .onGloballyPositioned { coords ->
+                                                val xDp = with(density) { coords.positionInParent().x.toDp() }
+                                                val wDp = with(density) { coords.size.width.toDp() }
+                                                val bounds = xDp to wDp
+                                                if (itemBounds[route.ordinal] != bounds) {
+                                                    itemBounds = itemBounds + (route.ordinal to bounds)
+                                                }
+                                            }
+                                            .clickable {
+                                                if (currentRoute != route) {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    currentRoute = route
+                                                }
+                                            }
+                                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = if (isSelected) route.selectedIcon else route.unselectedIcon,
+                                                contentDescription = route.title,
+                                                modifier = Modifier
+                                                    .size(20.dp)
+                                                    .graphicsLayer {
+                                                        scaleX = iconScale
+                                                        scaleY = iconScale
+                                                    },
+                                                tint = contentColor
                                             )
+                                            if (isSelected) {
+                                                Text(
+                                                    text = route.title,
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = contentColor
+                                                )
+                                            }
                                         }
                                     }
                                 }
