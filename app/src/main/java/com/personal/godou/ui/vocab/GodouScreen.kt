@@ -123,6 +123,8 @@ fun GodouScreen(
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
     MaterialTheme(colorScheme = sheetColorScheme) {
     SharedTransitionLayout {
         val sharedTransitionScope = this
@@ -152,6 +154,7 @@ fun GodouScreen(
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 showAddSheet = true
                             },
+                            modifier = Modifier.padding(bottom = navBottom + 76.dp),
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         )
@@ -159,8 +162,7 @@ fun GodouScreen(
                 }
             ) { _ ->
                 val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                val bottomScrollPadding = navBottom + 140.dp
+                val bottomScrollPadding = navBottom + 160.dp
 
                 AnimatedVisibility(visible = true) {
                     val rootAnimatedVisibilityScope = this
