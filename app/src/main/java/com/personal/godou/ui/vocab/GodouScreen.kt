@@ -996,7 +996,7 @@ fun VocabCardItem(
     val showFurigana = when (studyPrefs.furiganaMode) {
         FuriganaMode.ALWAYS_SHOW -> true
         FuriganaMode.HIDE_TAP_TO_REVEAL -> isFuriganaRevealed
-        FuriganaMode.ADAPT_JLPT -> entry.studyTag.contains("N1") || entry.studyTag.contains("N2")
+        FuriganaMode.ADAPT_JLPT -> entry.kanjiWord != entry.furiganaReading || entry.category.contains("N1", ignoreCase = true) || entry.subCategory.contains("N1", ignoreCase = true)
     }
 
     val cardBgColor = if (entry.isMastered) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerHighest
@@ -1242,7 +1242,7 @@ fun ExpressiveVocabDetailView(
     val showDetailFurigana = when (studyPrefs.furiganaMode) {
         FuriganaMode.ALWAYS_SHOW -> true
         FuriganaMode.HIDE_TAP_TO_REVEAL -> isDetailFuriganaRevealed
-        FuriganaMode.ADAPT_JLPT -> entry.studyTag.contains("N1") || entry.studyTag.contains("N2")
+        FuriganaMode.ADAPT_JLPT -> entry.kanjiWord != entry.furiganaReading || entry.category.contains("N1", ignoreCase = true) || entry.subCategory.contains("N1", ignoreCase = true)
     }
 
     var isDismissing by remember { mutableStateOf(false) }
