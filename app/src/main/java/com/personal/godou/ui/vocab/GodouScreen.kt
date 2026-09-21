@@ -1233,7 +1233,7 @@ fun ExpressiveVocabDetailView(
     val detailCardBgColor = if (isDark) {
         MaterialTheme.colorScheme.surfaceContainerHigh
     } else {
-        MaterialTheme.colorScheme.surfaceContainerLowest
+        MaterialTheme.colorScheme.surfaceContainerHigh
     }
 
     val studyPrefs = LocalStudyPreferences.current
@@ -1527,10 +1527,15 @@ fun ExpressiveVocabDetailView(
                 // Example Sentence Card
                 if (entry.exampleSentence.isNotBlank()) {
                     Spacer(modifier = Modifier.height(20.dp))
+                    val exampleCardBgColor = if (isDark) {
+                        MaterialTheme.colorScheme.surfaceContainerLowest
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerLow
+                    }
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                        color = exampleCardBgColor,
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -1639,6 +1644,14 @@ fun ExpressiveVocabAddSheet(
     var example by remember { mutableStateOf("") }
 
     val haptic = LocalHapticFeedback.current
+    val systemDark = isSystemInDarkTheme()
+    val themeSettings = LocalThemeSettings.current
+    val isDark = themeSettings.darkThemePreference.isDark(systemDark)
+    val addSheetCardBgColor = if (isDark) {
+        MaterialTheme.colorScheme.surfaceContainerLowest
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerLow
+    }
 
     Column(
         modifier = Modifier
@@ -1693,7 +1706,7 @@ fun ExpressiveVocabAddSheet(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+            color = addSheetCardBgColor,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -1751,7 +1764,7 @@ fun ExpressiveVocabAddSheet(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+            color = addSheetCardBgColor,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -1883,7 +1896,7 @@ fun ExpressiveVocabAddSheet(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+            color = addSheetCardBgColor,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
