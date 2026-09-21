@@ -1,6 +1,10 @@
 package com.personal.godou.ui.home
 
+import androidx.activity.ComponentActivity
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,20 +14,30 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.personal.godou.data.preferences.TopAppBarBackground
+import com.personal.godou.ui.settings.ThemeViewModel
+import com.personal.godou.ui.theme.ExpressivePhysics
 import com.personal.godou.ui.theme.LocalStudyPreferences
 import com.personal.godou.ui.theme.LocalThemeSettings
 import com.personal.godou.ui.theme.expressiveBackground
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    viewModel: ThemeViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
+) {
     val themeSettings = LocalThemeSettings.current
     val studyPrefs = LocalStudyPreferences.current
     val systemDark = isSystemInDarkTheme()
@@ -87,7 +101,14 @@ fun HomeScreen() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // ── 🔥 Expressive Daily Study Streak & 7-Day Heatmap Card ──
+            ExpressiveStreakCard(
+                streakDays = studyPrefs.streakDays,
+                weeklyMask = studyPrefs.weeklyActivityMask,
+                onToggleDay = { dayIndex -> viewModel.toggleWeeklyDay(dayIndex) }
+            )
 
             // ── Active Settings Summary Cards ──
             Surface(
@@ -147,6 +168,158 @@ fun HomeScreen() {
                         Column {
                             Text("並び替え順", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(studyPrefs.deckOrder.label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpressiveStreakCard(
+    streakDays: Int,
+    weeklyMask: Int,
+    onToggleDay: (Int) -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    val daysOfWeek = listOf("月", "火", "水", "木", "金", "土", "日")
+    val todayIndex = 6 // Current day (Sunday) highlighted
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header Row: 🔥 Fire Badge & Count
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "🔥",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    }
+
+                    Column {
+                        Text(
+                            text = "連続学習ストリーク",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "素晴らしい集中力です！",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                ) {
+                    Text(
+                        text = "🔥 ${streakDays}日連続",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
+            // 7-Day Heatmap Capsules Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                daysOfWeek.forEachIndexed { index, dayName ->
+                    val isActive = (weeklyMask and (1 shl index)) != 0
+                    val isToday = index == todayIndex
+
+                    val containerColor by animateColorAsState(
+                        targetValue = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
+                        animationSpec = ExpressivePhysics.fluidBouncy(),
+                        label = "heatmap_container_color"
+                    )
+
+                    val contentColor by animateColorAsState(
+                        targetValue = if (isActive) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        animationSpec = ExpressivePhysics.fluidBouncy(),
+                        label = "heatmap_content_color"
+                    )
+
+                    val scale by animateFloatAsState(
+                        targetValue = if (isToday) 1.08f else 1.0f,
+                        animationSpec = ExpressivePhysics.fluidBouncy(),
+                        label = "heatmap_scale"
+                    )
+
+                    Surface(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 3.dp)
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                            }
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onToggleDay(index)
+                            },
+                        shape = RoundedCornerShape(16.dp),
+                        color = containerColor,
+                        border = if (isToday) BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary) else null
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(vertical = 10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = dayName,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = if (isToday) FontWeight.Black else FontWeight.Bold,
+                                color = contentColor
+                            )
+
+                            if (isActive) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Check,
+                                    contentDescription = "Completed",
+                                    tint = contentColor,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            } else {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = contentColor.copy(alpha = 0.3f),
+                                    modifier = Modifier.size(6.dp)
+                                ) {}
+                            }
                         }
                     }
                 }

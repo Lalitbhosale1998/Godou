@@ -43,5 +43,7 @@ data class StudyPreferences(
     val srsAlgorithm: SrsAlgorithm = SrsAlgorithm.FSRS_ANKI,
     val deckOrder: DeckOrder = DeckOrder.DUE_DATE,
     val dailyReminderEnabled: Boolean = true,
-    val dailyReminderTime: String = "20:00"
+    val dailyReminderTime: String = "20:00",
+    val streakDays: Int = 7,
+    val weeklyActivityMask: Int = 0b1111101
 )

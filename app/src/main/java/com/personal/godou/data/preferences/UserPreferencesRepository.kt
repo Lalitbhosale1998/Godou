@@ -37,6 +37,8 @@ private object Keys {
     val DECK_ORDER = stringPreferencesKey("deck_order")
     val DAILY_REMINDER_ENABLED = booleanPreferencesKey("daily_reminder_enabled")
     val DAILY_REMINDER_TIME = stringPreferencesKey("daily_reminder_time")
+    val STREAK_DAYS = intPreferencesKey("streak_days")
+    val WEEKLY_ACTIVITY_MASK = intPreferencesKey("weekly_activity_mask")
 }
 
 @Singleton
@@ -74,7 +76,9 @@ class UserPreferencesRepository @Inject constructor(
             srsAlgorithm = SrsAlgorithm.fromStorage(prefs[Keys.SRS_ALGORITHM]),
             deckOrder = DeckOrder.fromStorage(prefs[Keys.DECK_ORDER]),
             dailyReminderEnabled = prefs[Keys.DAILY_REMINDER_ENABLED] ?: true,
-            dailyReminderTime = prefs[Keys.DAILY_REMINDER_TIME] ?: "20:00"
+            dailyReminderTime = prefs[Keys.DAILY_REMINDER_TIME] ?: "20:00",
+            streakDays = prefs[Keys.STREAK_DAYS] ?: 7,
+            weeklyActivityMask = prefs[Keys.WEEKLY_ACTIVITY_MASK] ?: 0b1111101
         )
     }
 
@@ -165,6 +169,18 @@ class UserPreferencesRepository @Inject constructor(
 
     suspend fun setDailyReminderTime(time: String) {
         dataStore.edit { it[Keys.DAILY_REMINDER_TIME] = time }
+    }
+
+    suspend fun setStreakDays(count: Int) {
+        dataStore.edit { it[Keys.STREAK_DAYS] = count }
+    }
+
+    suspend fun toggleWeeklyDay(dayIndex: Int) {
+        dataStore.edit { prefs ->
+            val currentMask = prefs[Keys.WEEKLY_ACTIVITY_MASK] ?: 0b1111101
+            val newMask = currentMask xor (1 shl dayIndex)
+            prefs[Keys.WEEKLY_ACTIVITY_MASK] = newMask
+        }
     }
 
     suspend fun resetAllSettings() {

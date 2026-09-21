@@ -226,6 +226,18 @@ class ThemeViewModel @Inject constructor(
         }
     }
 
+    fun toggleWeeklyDay(dayIndex: Int) {
+        viewModelScope.launch {
+            preferencesRepository.toggleWeeklyDay(dayIndex)
+        }
+    }
+
+    fun setStreakDays(count: Int) {
+        viewModelScope.launch {
+            preferencesRepository.setStreakDays(count)
+        }
+    }
+
     fun resetAllSettings() {
         viewModelScope.launch {
             preferencesRepository.resetAllSettings()
