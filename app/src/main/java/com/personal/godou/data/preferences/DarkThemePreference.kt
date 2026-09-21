@@ -1,9 +1,9 @@
 package com.personal.godou.data.preferences
 
-enum class DarkThemePreference {
-    SYSTEM,
-    LIGHT,
-    DARK;
+enum class DarkThemePreference(val label: String) {
+    SYSTEM("システム標準"),
+    LIGHT("ライト"),
+    DARK("ダーク");
 
     fun isDark(systemIsDark: Boolean): Boolean = when (this) {
         SYSTEM -> systemIsDark
@@ -16,4 +16,3 @@ enum class DarkThemePreference {
             entries.find { it.name == value } ?: SYSTEM
     }
 }
-
