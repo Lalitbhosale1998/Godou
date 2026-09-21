@@ -109,7 +109,7 @@ fun GodouAppRoot(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .padding(bottom = bottomInset + 16.dp)
-                            .height(56.dp)
+                            .height(68.dp)
                             .wrapContentWidth(),
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f),
@@ -159,7 +159,7 @@ fun GodouAppRoot(
                                         label = "nav_item_content"
                                     )
                                     val iconScale by animateFloatAsState(
-                                        targetValue = if (isSelected) 1.15f else 1.0f,
+                                        targetValue = if (isSelected) 1.25f else 1.0f,
                                         animationSpec = ExpressivePhysics.fluidBouncy(),
                                         label = "nav_item_icon_scale"
                                     )
@@ -180,18 +180,18 @@ fun GodouAppRoot(
                                                     currentRoute = route
                                                 }
                                             }
-                                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                                            .padding(horizontal = 22.dp, vertical = 14.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
                                             Icon(
                                                 imageVector = if (isSelected) route.selectedIcon else route.unselectedIcon,
                                                 contentDescription = route.title,
                                                 modifier = Modifier
-                                                    .size(20.dp)
+                                                    .size(25.dp)
                                                     .graphicsLayer {
                                                         scaleX = iconScale
                                                         scaleY = iconScale
@@ -201,7 +201,7 @@ fun GodouAppRoot(
                                             if (isSelected) {
                                                 Text(
                                                     text = route.title,
-                                                    style = MaterialTheme.typography.labelMedium,
+                                                    style = MaterialTheme.typography.titleMedium,
                                                     fontWeight = FontWeight.Bold,
                                                     color = contentColor
                                                 )

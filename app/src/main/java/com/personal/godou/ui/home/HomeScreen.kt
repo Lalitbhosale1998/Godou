@@ -2,8 +2,10 @@ package com.personal.godou.ui.home
 
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.*
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -18,7 +20,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -189,6 +193,27 @@ fun ExpressiveStreakCard(
     val daysOfWeek = listOf("月", "火", "水", "木", "金", "土", "日")
     val todayIndex = 6 // Current day (Sunday) highlighted
 
+    // M3 Expressive Continuous Breathing & Sway Physics
+    val infiniteTransition = rememberInfiniteTransition(label = "expressive_flame_idle")
+    val idleFlamePulse by infiniteTransition.animateFloat(
+        initialValue = 0.96f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1600, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "idle_flame_pulse"
+    )
+    val idleFlameRotation by infiniteTransition.animateFloat(
+        initialValue = -3.5f,
+        targetValue = 3.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2200, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "idle_flame_rotation"
+    )
+
     // Option 3: Synchronized Flame Badge Scale Target
     var flameScaleTarget by remember { mutableFloatStateOf(1.0f) }
     val animatedFlameScale by animateFloatAsState(
@@ -210,50 +235,54 @@ fun ExpressiveStreakCard(
             modifier = Modifier.padding(22.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            // Header Row: 🔥 Fire Badge & Count with Synchronized Spring Pulse
-            Row(
+            // Header Row: 🔥 M3 Expressive Fire Hero Badge & Count
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                        modifier = Modifier
-                            .size(54.dp)
-                            .graphicsLayer {
-                                scaleX = animatedFlameScale
-                                scaleY = animatedFlameScale
-                            }
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = "🔥",
-                                fontSize = 26.sp
-                            )
-                        }
-                    }
+                // 1. 🔥 M3 Expressive 200.dp Hero Flame Container (Morphing Continuous Squircle + Dynamic Monet Radial Wash)
+                val expressiveFlameBrush = Brush.radialGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.95f),
+                        MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.90f),
+                        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.75f)
+                    )
+                )
 
-                    Column {
-                        Text(
-                            text = "連続学習ストリーク",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "素晴らしい集中力です！",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                Surface(
+                    shape = RoundedCornerShape(44.dp),
+                    color = Color.Transparent,
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)),
+                    modifier = Modifier
+                        .size(180.dp)
+                        .graphicsLayer {
+                            scaleX = animatedFlameScale * idleFlamePulse
+                            scaleY = animatedFlameScale * idleFlamePulse
+                            rotationZ = idleFlameRotation
+                        }
+                        .clickable {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            coroutineScope.launch {
+                                flameScaleTarget = 1.35f
+                                delay(180)
+                                flameScaleTarget = 1.0f
+                            }
+                        }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(expressiveFlameBrush),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        ExpressiveFlameVectorHero(
+                            modifier = Modifier.size(120.dp)
                         )
                     }
                 }
 
+                // 2. 🔥 M3 Expressive Streak Count Pill
                 Surface(
                     shape = RoundedCornerShape(50.dp),
                     color = MaterialTheme.colorScheme.primaryContainer,
@@ -265,10 +294,26 @@ fun ExpressiveStreakCard(
                 ) {
                     Text(
                         text = "🔥 ${streakDays}日連続",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 10.dp),
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+
+                // 3. Centered Title & Subtitle
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "連続学習ストリーク",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "素晴らしい集中力です！",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -330,13 +375,13 @@ fun ExpressiveStreakCard(
                         border = if (isToday) BorderStroke(2.5.dp, MaterialTheme.colorScheme.tertiary) else null
                     ) {
                         Column(
-                            modifier = Modifier.padding(vertical = 14.dp),
+                            modifier = Modifier.padding(vertical = 20.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
                                 text = dayName,
-                                fontSize = 15.sp,
+                                fontSize = 18.sp,
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = if (isToday) FontWeight.Black else FontWeight.ExtraBold,
                                 color = contentColor
@@ -355,13 +400,13 @@ fun ExpressiveStreakCard(
                                         imageVector = Icons.Outlined.Check,
                                         contentDescription = "Completed",
                                         tint = contentColor,
-                                        modifier = Modifier.size(18.dp)
+                                        modifier = Modifier.size(22.dp)
                                     )
                                 } else {
                                     Surface(
                                         shape = CircleShape,
                                         color = contentColor.copy(alpha = 0.35f),
-                                        modifier = Modifier.size(8.dp)
+                                        modifier = Modifier.size(10.dp)
                                     ) {}
                                 }
                             }
@@ -370,5 +415,141 @@ fun ExpressiveStreakCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ExpressiveFlameVectorHero(
+    modifier: Modifier = Modifier,
+    flameScale: Float = 1.0f
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "m3_flame_canvas_anim")
+    
+    val flicker1 by infiniteTransition.animateFloat(
+        initialValue = 0.94f,
+        targetValue = 1.06f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(900, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "flicker1"
+    )
+    val flicker2 by infiniteTransition.animateFloat(
+        initialValue = -3.5f,
+        targetValue = 3.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1400, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "flicker2"
+    )
+
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
+    val errorColor = MaterialTheme.colorScheme.error
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
+
+    Canvas(
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = flameScale * flicker1
+                scaleY = flameScale * flicker1
+                rotationZ = flicker2
+            }
+    ) {
+        val w = size.width
+        val h = size.height
+        val cx = w / 2f
+        val cy = h / 2f
+
+        // Outer Flame Body
+        val outerFlamePath = Path().apply {
+            moveTo(cx, cy - h * 0.44f)
+            cubicTo(
+                cx + w * 0.28f, cy - h * 0.26f,
+                cx + w * 0.44f, cy - h * 0.04f,
+                cx + w * 0.40f, cy + h * 0.24f
+            )
+            cubicTo(
+                cx + w * 0.34f, cy + h * 0.46f,
+                cx - w * 0.34f, cy + h * 0.46f,
+                cx - w * 0.40f, cy + h * 0.24f
+            )
+            cubicTo(
+                cx - w * 0.44f, cy - h * 0.04f,
+                cx - w * 0.16f, cy - h * 0.22f,
+                cx - w * 0.12f, cy - h * 0.12f
+            )
+            cubicTo(
+                cx - w * 0.10f, cy - h * 0.28f,
+                cx - w * 0.02f, cy - h * 0.38f,
+                cx, cy - h * 0.44f
+            )
+            close()
+        }
+
+        // Inner Flame Core
+        val innerFlamePath = Path().apply {
+            moveTo(cx, cy - h * 0.24f)
+            cubicTo(
+                cx + w * 0.18f, cy - h * 0.12f,
+                cx + w * 0.26f, cy + h * 0.04f,
+                cx + w * 0.22f, cy + h * 0.26f
+            )
+            cubicTo(
+                cx + w * 0.16f, cy + h * 0.38f,
+                cx - w * 0.16f, cy + h * 0.38f,
+                cx - w * 0.22f, cy + h * 0.26f
+            )
+            cubicTo(
+                cx - w * 0.26f, cy + h * 0.08f,
+                cx - w * 0.10f, cy - h * 0.06f,
+                cx, cy - h * 0.24f
+            )
+            close()
+        }
+
+        // Hot Core Spark
+        val sparkPath = Path().apply {
+            moveTo(cx, cy + h * 0.02f)
+            cubicTo(
+                cx + w * 0.10f, cy + h * 0.12f,
+                cx + w * 0.12f, cy + h * 0.24f,
+                cx + w * 0.07f, cy + h * 0.32f
+            )
+            cubicTo(
+                cx + w * 0.04f, cy + h * 0.36f,
+                cx - w * 0.04f, cy + h * 0.36f,
+                cx - w * 0.07f, cy + h * 0.32f
+            )
+            cubicTo(
+                cx - w * 0.12f, cy + h * 0.24f,
+                cx - w * 0.06f, cy + h * 0.12f,
+                cx, cy + h * 0.02f
+            )
+            close()
+        }
+
+        // 1. Outer Glowing Flame (Dynamic Monet Gradient)
+        drawPath(
+            path = outerFlamePath,
+            brush = Brush.verticalGradient(
+                colors = listOf(errorColor, tertiaryColor, secondaryColor)
+            )
+        )
+
+        // 2. Inner Flame Core
+        drawPath(
+            path = innerFlamePath,
+            brush = Brush.verticalGradient(
+                colors = listOf(tertiaryColor, primaryContainer)
+            )
+        )
+
+        // 3. Hot Spark Core Highlight
+        drawPath(
+            path = sparkPath,
+            color = Color.White.copy(alpha = 0.94f)
+        )
     }
 }
