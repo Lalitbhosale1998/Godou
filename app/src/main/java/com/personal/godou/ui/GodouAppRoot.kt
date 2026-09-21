@@ -86,18 +86,18 @@ fun GodouAppRoot(
                     }
                 }
 
-                // ── M3 Expressive Floating Top-Bar Navigation Dock ──
-                val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                // ── M3 Expressive Floating Bottom-Center Navigation Dock ──
+                val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                 Surface(
                     modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = topInset + 8.dp)
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = bottomInset + 16.dp)
                         .height(56.dp)
                         .wrapContentWidth(),
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.92f),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
-                    shadowElevation = 8.dp
+                    shadowElevation = 10.dp
                 ) {
                     Row(
                         modifier = Modifier
