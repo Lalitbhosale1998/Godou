@@ -1,7 +1,7 @@
 package com.personal.godou.ui.home
 
 import androidx.activity.ComponentActivity
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -33,6 +33,8 @@ import com.personal.godou.ui.theme.ExpressivePhysics
 import com.personal.godou.ui.theme.LocalStudyPreferences
 import com.personal.godou.ui.theme.LocalThemeSettings
 import com.personal.godou.ui.theme.expressiveBackground
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -183,8 +185,20 @@ fun ExpressiveStreakCard(
     onToggleDay: (Int) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
+    val coroutineScope = rememberCoroutineScope()
     val daysOfWeek = listOf("月", "火", "水", "木", "金", "土", "日")
     val todayIndex = 6 // Current day (Sunday) highlighted
+
+    // Option 3: Synchronized Flame Badge Scale Target
+    var flameScaleTarget by remember { mutableFloatStateOf(1.0f) }
+    val animatedFlameScale by animateFloatAsState(
+        targetValue = flameScaleTarget,
+        animationSpec = ExpressivePhysics.fluidBouncy(),
+        label = "flame_badge_pulse"
+    )
+
+    // Option 1: Per-day Pill Spring Pulse Target map
+    var dayPulseIndex by remember { mutableIntStateOf(-1) }
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -196,7 +210,7 @@ fun ExpressiveStreakCard(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header Row: 🔥 Fire Badge & Count
+            // Header Row: 🔥 Fire Badge & Count with Synchronized Spring Pulse
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -209,7 +223,12 @@ fun ExpressiveStreakCard(
                     Surface(
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.tertiaryContainer,
-                        modifier = Modifier.size(44.dp)
+                        modifier = Modifier
+                            .size(44.dp)
+                            .graphicsLayer {
+                                scaleX = animatedFlameScale
+                                scaleY = animatedFlameScale
+                            }
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
@@ -237,7 +256,11 @@ fun ExpressiveStreakCard(
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.primaryContainer,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+                    modifier = Modifier.graphicsLayer {
+                        scaleX = animatedFlameScale
+                        scaleY = animatedFlameScale
+                    }
                 ) {
                     Text(
                         text = "🔥 ${streakDays}日連続",
@@ -249,7 +272,7 @@ fun ExpressiveStreakCard(
                 }
             }
 
-            // 7-Day Heatmap Capsules Row
+            // 7-Day Heatmap Capsules Row with Bouncy Spring Pulse & Scale Bounce
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -258,6 +281,7 @@ fun ExpressiveStreakCard(
                 daysOfWeek.forEachIndexed { index, dayName ->
                     val isActive = (weeklyMask and (1 shl index)) != 0
                     val isToday = index == todayIndex
+                    val isPulsing = dayPulseIndex == index
 
                     val containerColor by animateColorAsState(
                         targetValue = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
@@ -271,8 +295,11 @@ fun ExpressiveStreakCard(
                         label = "heatmap_content_color"
                     )
 
+                    val baseScale = if (isToday) 1.08f else 1.0f
+                    val pulseMultiplier = if (isPulsing) 1.25f else 1.0f
+
                     val scale by animateFloatAsState(
-                        targetValue = if (isToday) 1.08f else 1.0f,
+                        targetValue = baseScale * pulseMultiplier,
                         animationSpec = ExpressivePhysics.fluidBouncy(),
                         label = "heatmap_scale"
                     )
@@ -288,6 +315,13 @@ fun ExpressiveStreakCard(
                             .clip(RoundedCornerShape(16.dp))
                             .clickable {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                coroutineScope.launch {
+                                    dayPulseIndex = index
+                                    flameScaleTarget = 1.30f
+                                    delay(160)
+                                    dayPulseIndex = -1
+                                    flameScaleTarget = 1.0f
+                                }
                                 onToggleDay(index)
                             },
                         shape = RoundedCornerShape(16.dp),
@@ -306,19 +340,28 @@ fun ExpressiveStreakCard(
                                 color = contentColor
                             )
 
-                            if (isActive) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Check,
-                                    contentDescription = "Completed",
-                                    tint = contentColor,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            } else {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = contentColor.copy(alpha = 0.3f),
-                                    modifier = Modifier.size(6.dp)
-                                ) {}
+                            AnimatedContent(
+                                targetState = isActive,
+                                transitionSpec = {
+                                    (scaleIn(ExpressivePhysics.fluidBouncy()) + fadeIn())
+                                        .togetherWith(scaleOut(ExpressivePhysics.fluidBouncy()) + fadeOut())
+                                },
+                                label = "day_check_anim"
+                            ) { active ->
+                                if (active) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Check,
+                                        contentDescription = "Completed",
+                                        tint = contentColor,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                } else {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = contentColor.copy(alpha = 0.3f),
+                                        modifier = Modifier.size(6.dp)
+                                    ) {}
+                                }
                             }
                         }
                     }
