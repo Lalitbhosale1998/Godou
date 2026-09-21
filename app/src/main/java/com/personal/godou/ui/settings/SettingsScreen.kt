@@ -60,7 +60,10 @@ fun SettingsScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = Color.Transparent
-    ) { innerPadding ->
+    ) { _ ->
+        val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -71,13 +74,12 @@ fun SettingsScreen(
                     containerColor = Color.Unspecified,
                     pattern = themeSettings.backdropPattern
                 )
-                .padding(innerPadding)
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
-                    top = 24.dp,
-                    bottom = 120.dp,
+                    top = topInset + 16.dp,
+                    bottom = bottomInset + 110.dp,
                     start = 18.dp,
                     end = 18.dp
                 ),
