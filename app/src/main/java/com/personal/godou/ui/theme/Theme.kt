@@ -168,37 +168,10 @@ fun Modifier.expressiveBackground(
     containerColor: Color = Color.Unspecified,
     pattern: BackdropPattern = BackdropPattern.NONE
 ): Modifier = this.composed {
-    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
-    val secondaryContainer = MaterialTheme.colorScheme.secondaryContainer
-    val tertiaryContainer = MaterialTheme.colorScheme.tertiaryContainer
     val backgroundColor = MaterialTheme.colorScheme.background
 
     this.drawBehind {
-        if (containerColor != Color.Unspecified) {
-            drawRect(color = containerColor)
-        } else if (isDark) {
-            drawRect(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        backgroundColor,
-                        primaryContainer.copy(alpha = 0.20f),
-                        tertiaryContainer.copy(alpha = 0.15f),
-                        backgroundColor
-                    )
-                )
-            )
-        } else {
-            drawRect(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        primaryContainer.copy(alpha = 0.35f),
-                        tertiaryContainer.copy(alpha = 0.28f),
-                        secondaryContainer.copy(alpha = 0.22f),
-                        primaryContainer.copy(alpha = 0.18f)
-                    )
-                )
-            )
-        }
+        drawRect(color = if (containerColor != Color.Unspecified) containerColor else backgroundColor)
     }
 }
 
