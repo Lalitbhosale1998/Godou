@@ -30,6 +30,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.personal.godou.data.preferences.*
 import androidx.compose.foundation.background
 import androidx.compose.ui.draw.clip
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.style.TextAlign
 import com.personal.godou.ui.theme.ExpressivePhysics
 import com.personal.godou.ui.theme.LocalThemeSettings
 import com.personal.godou.ui.theme.expressiveBackground
@@ -154,6 +161,9 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                         )
 
+                        // 🗾 50-On Hiragana Matrix Preview Card
+                        HiraganaMatrixPreviewCard(selectedFont = themeSettings.appFont)
+
                         // Japanese & App Font Selector
                         Text(
                             text = "日本語・アプリ書体フォント (${themeSettings.appFont.label})",
@@ -236,7 +246,9 @@ fun SettingsScreen(
                         icon = Icons.Outlined.Translate,
                         accentColor = MaterialTheme.colorScheme.secondary
                     ) {
-                        // Furigana Display Mode
+                        // 🈲 Feature 9: Live Furigana Reading Visual Comparison Card
+                        FuriganaVisualComparisonCard(mode = studyPrefs.furiganaMode)
+
                         Text(
                             text = "ルビ（ふりがな）表示モード",
                             style = MaterialTheme.typography.titleSmall,
@@ -345,6 +357,9 @@ fun SettingsScreen(
                             modifier = Modifier.padding(vertical = 12.dp),
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                         )
+
+                        // 📈 Feature 4: Interactive SRS Retention Curve / Leitner Boxes Canvas
+                        SrsAlgorithmVisualizerCanvas(algorithm = studyPrefs.srsAlgorithm)
 
                         // SRS Algorithm Choice
                         Text(
@@ -529,90 +544,25 @@ fun SettingsScreen(
                         icon = Icons.Outlined.Storage,
                         accentColor = MaterialTheme.colorScheme.error
                     ) {
-                        // Import / Export Buttons
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            OutlinedButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showImportSuccessSnackbar = "Anki / CSV デッキインポート機能を準備中..."
-                                },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Icon(Icons.Outlined.FileUpload, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Text("デッキ取り込み", fontSize = 12.sp)
-                                }
-                            }
-
-                            OutlinedButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showImportSuccessSnackbar = "学習データのバックアップを出力しました"
-                                },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Icon(Icons.Outlined.FileDownload, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Text("データ書き出し", fontSize = 12.sp)
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Reset Settings Danger Action
-                        FilledTonalButton(
-                            onClick = {
+                        // 🛡️ Feature 10: Glassmorphic Quick Action Deck (2x2 Matrix)
+                        QuickActionDeckGrid(
+                            onImport = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                showResetDialog = true
+                                showImportSuccessSnackbar = "Anki / CSV デッキインポート機能を準備中..."
                             },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(Icons.Outlined.RestartAlt, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Text("設定のリセット・キャッシュ消去", fontWeight = FontWeight.Bold)
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // About Godou App Info Card
-                        OutlinedButton(
-                            onClick = {
+                            onExport = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                showImportSuccessSnackbar = "学習データのバックアップを出力しました"
+                            },
+                            onAbout = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 showAboutSheet = true
                             },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(Icons.Outlined.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                                Text("アプリについて (About Godou 語道)", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                            onReset = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                showResetDialog = true
                             }
-                        }
+                        )
                     }
                 }
             }
@@ -750,6 +700,243 @@ fun SettingsScreen(
     }
 }
 
+// ── 🈲 Feature 9: Furigana Visual Comparison Card ──
+@Composable
+private fun FuriganaVisualComparisonCard(mode: FuriganaMode) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "プレビュー表示サンプル",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 6.dp)
+            )
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                when (mode) {
+                    FuriganaMode.ALWAYS_SHOW -> {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("かんじ", fontSize = 10.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                            Text("漢字", fontSize = 20.sp, fontWeight = FontWeight.Black)
+                        }
+                        Text("の", fontSize = 18.sp, modifier = Modifier.padding(horizontal = 4.dp))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("べんきょう", fontSize = 10.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                            Text("勉強", fontSize = 20.sp, fontWeight = FontWeight.Black)
+                        }
+                    }
+                    FuriganaMode.HIDE_TAP_TO_REVEAL -> {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("•••", fontSize = 10.sp, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
+                            Text("漢字", fontSize = 20.sp, fontWeight = FontWeight.Black)
+                        }
+                        Text("の", fontSize = 18.sp, modifier = Modifier.padding(horizontal = 4.dp))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("•••", fontSize = 10.sp, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
+                            Text("勉強", fontSize = 20.sp, fontWeight = FontWeight.Black)
+                        }
+                    }
+                    FuriganaMode.ADAPT_JLPT -> {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("かんじ (N1)", fontSize = 10.sp, color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)
+                            Text("漢字", fontSize = 20.sp, fontWeight = FontWeight.Black)
+                        }
+                        Text("の", fontSize = 18.sp, modifier = Modifier.padding(horizontal = 4.dp))
+                        Text("勉強", fontSize = 20.sp, fontWeight = FontWeight.Black)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ── 📈 Feature 4: Interactive SRS Retention Curve / Leitner Boxes Canvas ──
+@Composable
+private fun SrsAlgorithmVisualizerCanvas(algorithm: SrsAlgorithm) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(96.dp)
+            .padding(bottom = 12.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+    ) {
+        val tertiaryColor = MaterialTheme.colorScheme.tertiary
+        val onSurfaceVar = MaterialTheme.colorScheme.onSurfaceVariant
+        val primaryColor = MaterialTheme.colorScheme.primary
+
+        if (algorithm == SrsAlgorithm.FSRS_ANKI) {
+            Canvas(modifier = Modifier.fillMaxSize().padding(14.dp)) {
+                val width = size.width
+                val height = size.height
+                val path = Path()
+
+                path.moveTo(0f, height * 0.15f)
+                path.cubicTo(
+                    width * 0.35f, height * 0.2f,
+                    width * 0.65f, height * 0.75f,
+                    width, height * 0.85f
+                )
+
+                drawPath(
+                    path = path,
+                    color = tertiaryColor,
+                    style = Stroke(width = 3.dp.toPx())
+                )
+
+                drawCircle(color = tertiaryColor, radius = 4.dp.toPx(), center = Offset(0f, height * 0.15f))
+                drawCircle(color = tertiaryColor, radius = 4.dp.toPx(), center = Offset(width * 0.5f, height * 0.5f))
+                drawCircle(color = tertiaryColor, radius = 4.dp.toPx(), center = Offset(width, height * 0.85f))
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                val boxLabels = listOf("1日", "3日", "7日", "14日", "30日")
+                val boxHeights = listOf(0.35f, 0.50f, 0.65f, 0.80f, 1.0f)
+                boxLabels.forEachIndexed { idx, label ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom,
+                        modifier = Modifier.weight(1f).padding(horizontal = 2.dp)
+                    ) {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(boxHeights[idx] * 0.65f),
+                            shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp),
+                            color = primaryColor.copy(alpha = 0.25f + idx * 0.15f)
+                        ) {}
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = label,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = onSurfaceVar,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ── 🛡️ Feature 10: Glassmorphic Quick Action Deck (2x2 Matrix) ──
+@Composable
+private fun QuickActionDeckGrid(
+    onImport: () -> Unit,
+    onExport: () -> Unit,
+    onAbout: () -> Unit,
+    onReset: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            QuickActionTile(
+                title = "デッキ取り込み",
+                subtitle = "Anki / CSV",
+                icon = Icons.Outlined.FileUpload,
+                accentColor = MaterialTheme.colorScheme.primary,
+                onClick = onImport,
+                modifier = Modifier.weight(1f)
+            )
+            QuickActionTile(
+                title = "データ書き出し",
+                subtitle = "JSON Backup",
+                icon = Icons.Outlined.FileDownload,
+                accentColor = MaterialTheme.colorScheme.secondary,
+                onClick = onExport,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            QuickActionTile(
+                title = "アプリについて",
+                subtitle = "Godou v1.0.0",
+                icon = Icons.Outlined.Info,
+                accentColor = MaterialTheme.colorScheme.tertiary,
+                onClick = onAbout,
+                modifier = Modifier.weight(1f)
+            )
+            QuickActionTile(
+                title = "設定リセット",
+                subtitle = "初期状態化",
+                icon = Icons.Outlined.RestartAlt,
+                accentColor = MaterialTheme.colorScheme.error,
+                onClick = onReset,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun QuickActionTile(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    accentColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.height(72.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = accentColor.copy(alpha = 0.12f),
+        border = BorderStroke(1.dp, accentColor.copy(alpha = 0.25f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = accentColor.copy(alpha = 0.20f),
+                modifier = Modifier.size(36.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(imageVector = icon, contentDescription = null, tint = accentColor, modifier = Modifier.size(18.dp))
+                }
+            }
+            Column {
+                Text(text = title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(text = subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
+}
+
+// ── 🏷️ Feature 8: Color-Coded Vertical Accent Pillars & Morphing Shapes ──
 @Composable
 private fun SettingsSectionCard(
     title: String,
@@ -759,41 +946,51 @@ private fun SettingsSectionCard(
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.78f),
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 12.dp, bottomEnd = 28.dp, bottomStart = 12.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.88f),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
         shadowElevation = 0.dp
     ) {
-        Column(
-            modifier = Modifier.padding(18.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.padding(bottom = 14.dp)
+        Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+            Box(
+                modifier = Modifier
+                    .width(6.dp)
+                    .fillMaxHeight()
+                    .background(accentColor)
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(18.dp)
             ) {
-                Surface(
-                    shape = CircleShape,
-                    color = accentColor.copy(alpha = 0.15f),
-                    modifier = Modifier.size(36.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.padding(bottom = 14.dp)
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = accentColor,
-                            modifier = Modifier.size(20.dp)
-                        )
+                    Surface(
+                        shape = CircleShape,
+                        color = accentColor.copy(alpha = 0.15f),
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = accentColor,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                content()
             }
-            content()
         }
     }
 }
@@ -834,6 +1031,7 @@ private fun SettingsSwitchRow(
     }
 }
 
+// ── 🌗 Feature 7: Morphing Theme Toggle (Sun ➔ Moon ➔ Pixel) ──
 @Composable
 private fun ExpressiveThemeSegmentedControl(
     selectedPref: DarkThemePreference,
@@ -847,10 +1045,10 @@ private fun ExpressiveThemeSegmentedControl(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp),
+            .height(50.dp),
         shape = CircleShape,
-        color = Color.Transparent,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
     ) {
         BoxWithConstraints(
             modifier = Modifier
@@ -864,7 +1062,6 @@ private fun ExpressiveThemeSegmentedControl(
                 label = "theme_indicator_offset"
             )
 
-            // Continuous Sliding Active Pill
             Box(
                 modifier = Modifier
                     .offset(x = indicatorOffset)
@@ -874,7 +1071,6 @@ private fun ExpressiveThemeSegmentedControl(
                     .background(MaterialTheme.colorScheme.primaryContainer)
             )
 
-            // Interactive Row
             Row(modifier = Modifier.fillMaxSize()) {
                 entries.forEach { pref ->
                     val isSelected = selectedPref == pref
@@ -888,6 +1084,17 @@ private fun ExpressiveThemeSegmentedControl(
                         DarkThemePreference.LIGHT -> Icons.Outlined.LightMode
                         DarkThemePreference.DARK -> Icons.Outlined.DarkMode
                     }
+
+                    val rotationAnim by animateFloatAsState(
+                        targetValue = if (isSelected) 360f else 0f,
+                        animationSpec = ExpressivePhysics.fluidBouncy(),
+                        label = "icon_rotation"
+                    )
+                    val scaleAnim by animateFloatAsState(
+                        targetValue = if (isSelected) 1.15f else 1.0f,
+                        animationSpec = ExpressivePhysics.fluidBouncy(),
+                        label = "icon_scale"
+                    )
 
                     Box(
                         modifier = Modifier
@@ -908,7 +1115,13 @@ private fun ExpressiveThemeSegmentedControl(
                                 imageVector = icon,
                                 contentDescription = null,
                                 tint = contentColor,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .graphicsLayer {
+                                        rotationZ = rotationAnim
+                                        scaleX = scaleAnim
+                                        scaleY = scaleAnim
+                                    }
                             )
                             Text(
                                 text = pref.label,
@@ -923,3 +1136,107 @@ private fun ExpressiveThemeSegmentedControl(
         }
     }
 }
+
+// ── 🗾 Feature: 50-On Hiragana Matrix Preview Card (あいうえお) ──
+@Composable
+private fun HiraganaMatrixPreviewCard(selectedFont: AppFont) {
+    val hiraganaRows = listOf(
+        listOf("あ", "い", "う", "え", "お"),
+        listOf("か", "き", "く", "け", "こ"),
+        listOf("さ", "し", "す", "せ", "そ"),
+        listOf("た", "ち", "つ", "て", "と"),
+        listOf("な", "に", "ぬ", "ね", "の")
+    )
+    var selectedRowIndex by remember { mutableIntStateOf(0) }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.55f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "五十音プレビュー (50-On Matrix)",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Text(
+                        text = selectedFont.label,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.7f),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    hiraganaRows[selectedRowIndex].forEach { char ->
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = char,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                listOf("あ行", "か行", "さ行", "た行", "な行").forEachIndexed { index, rowName ->
+                    val isSelected = selectedRowIndex == index
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { selectedRowIndex = index },
+                        label = { Text(rowName, fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
+                        modifier = Modifier.weight(1f),
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor = Color.Transparent,
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        shape = CircleShape
+                    )
+                }
+            }
+        }
+    }
+}
+
