@@ -191,7 +191,7 @@ fun ExpressiveStreakCard(
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
     val daysOfWeek = listOf("月", "火", "水", "木", "金", "土", "日")
-    val todayIndex = 6 // Current day (Sunday) highlighted
+    val todayIndex = remember { (java.time.LocalDate.now().dayOfWeek.value - 1).coerceIn(0, 6) }
 
     // M3 Expressive Continuous Breathing & Sway Physics
     val infiniteTransition = rememberInfiniteTransition(label = "expressive_flame_idle")
