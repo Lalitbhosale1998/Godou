@@ -17,3 +17,11 @@ enum class TouchSynesthesia {
     }
 }
 
+val TouchSynesthesia.label: String
+    get() = when (this) {
+        TouchSynesthesia.OFF -> "オフ"
+        TouchSynesthesia.SUBTLE -> "控えめ"
+        TouchSynesthesia.CASSETTE_CLICK -> "カセット"
+        TouchSynesthesia.MECHANICAL -> "メカニカル"
+    }
+

@@ -129,53 +129,14 @@ fun SettingsScreen(
                     }
                 }
 
-                // ── 1. 日本語・表示設定 (Japanese & Typography) ──
+                // ── 1. 外観・パーソナライズ (Appearance & Personalization) ──
                 item {
                     SettingsSectionCard(
-                        title = "日本語・表示設定",
-                        icon = Icons.Outlined.Translate,
+                        title = "外観・パーソナライズ",
+                        icon = Icons.Outlined.Palette,
                         accentColor = MaterialTheme.colorScheme.primary
                     ) {
-                        // Furigana Display Mode
-                        Text(
-                            text = "ルビ（ふりがな）表示",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            FuriganaMode.entries.forEach { mode ->
-                                val isSelected = studyPrefs.furiganaMode == mode
-                                FilterChip(
-                                    selected = isSelected,
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        viewModel.setFuriganaMode(mode)
-                                    },
-                                    label = { Text(mode.label, fontSize = 12.sp) },
-                                    leadingIcon = if (isSelected) {
-                                        { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
-                                    } else null,
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        containerColor = Color.Transparent,
-                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                    ),
-                                    shape = CircleShape
-                                )
-                            }
-                        }
-
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 12.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-                        )
-
-                        // App Theme Mode (System / Light / Dark) - Fluid Spring Sliding Segmented Control
+                        // App Theme Mode
                         Text(
                             text = "アプリテーマ",
                             style = MaterialTheme.typography.titleSmall,
@@ -195,7 +156,7 @@ fun SettingsScreen(
 
                         // Japanese & App Font Selector
                         Text(
-                            text = "日本語・アプリ書体フォント",
+                            text = "日本語・アプリ書体フォント (${themeSettings.appFont.label})",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -232,6 +193,88 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                         )
 
+                        // Glow Intensity Selector
+                        Text(
+                            text = "ネオングローエフェクト強弱",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            GlowIntensity.entries.forEach { intensity ->
+                                val isSelected = themeSettings.glowIntensity == intensity
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        viewModel.setGlowIntensity(intensity)
+                                    },
+                                    label = { Text(intensity.label, fontSize = 12.sp) },
+                                    leadingIcon = if (isSelected) {
+                                        { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
+                                    } else null,
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        containerColor = Color.Transparent,
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    ),
+                                    shape = CircleShape
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // ── 2. 日本語表示・ルビ (Japanese & Reading Rules) ──
+                item {
+                    SettingsSectionCard(
+                        title = "日本語表示・ルビ",
+                        icon = Icons.Outlined.Translate,
+                        accentColor = MaterialTheme.colorScheme.secondary
+                    ) {
+                        // Furigana Display Mode
+                        Text(
+                            text = "ルビ（ふりがな）表示モード",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            FuriganaMode.entries.forEach { mode ->
+                                val isSelected = studyPrefs.furiganaMode == mode
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        viewModel.setFuriganaMode(mode)
+                                    },
+                                    label = { Text(mode.label, fontSize = 12.sp) },
+                                    leadingIcon = if (isSelected) {
+                                        { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
+                                    } else null,
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        containerColor = Color.Transparent,
+                                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                    ),
+                                    shape = CircleShape
+                                )
+                            }
+                        }
+
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 12.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                        )
+
                         // Romaji Helper Switch
                         SettingsSwitchRow(
                             title = "ローマ字ガイド",
@@ -245,12 +288,12 @@ fun SettingsScreen(
                     }
                 }
 
-                // ── 2. 学習・SRS設定 (Study & Spaced Repetition) ──
+                // ── 3. 学習・SRS設定 (Study & Spaced Repetition) ──
                 item {
                     SettingsSectionCard(
-                        title = "学習・SRS設定",
+                        title = "学習・SRSアルゴリズム",
                         icon = Icons.Outlined.School,
-                        accentColor = MaterialTheme.colorScheme.secondary
+                        accentColor = MaterialTheme.colorScheme.tertiary
                     ) {
                         // Daily Goal Counter
                         Row(
@@ -273,13 +316,13 @@ fun SettingsScreen(
                             }
                             Surface(
                                 shape = CircleShape,
-                                color = MaterialTheme.colorScheme.secondaryContainer
+                                color = MaterialTheme.colorScheme.tertiaryContainer
                             ) {
                                 Text(
                                     text = "${studyPrefs.dailyGoalWords} 単語/日",
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
                                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
                                 )
                             }
@@ -292,8 +335,8 @@ fun SettingsScreen(
                             valueRange = 1f..20f,
                             steps = 18,
                             colors = SliderDefaults.colors(
-                                thumbColor = MaterialTheme.colorScheme.secondary,
-                                activeTrackColor = MaterialTheme.colorScheme.secondary
+                                thumbColor = MaterialTheme.colorScheme.tertiary,
+                                activeTrackColor = MaterialTheme.colorScheme.tertiary
                             ),
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -326,11 +369,11 @@ fun SettingsScreen(
                                     shape = RoundedCornerShape(16.dp),
                                     border = BorderStroke(
                                         width = if (isSelected) 2.dp else 1.dp,
-                                        color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outlineVariant
+                                        color = if (isSelected) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outlineVariant
                                     ),
                                     colors = ButtonDefaults.outlinedButtonColors(
-                                        containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f) else Color.Transparent,
-                                        contentColor = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                        containerColor = if (isSelected) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f) else Color.Transparent,
+                                        contentColor = if (isSelected) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 ) {
                                     Text(algo.label, fontSize = 12.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal)
@@ -369,8 +412,8 @@ fun SettingsScreen(
                                     } else null,
                                     colors = FilterChipDefaults.filterChipColors(
                                         containerColor = Color.Transparent,
-                                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                        selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer
                                     ),
                                     shape = CircleShape
                                 )
@@ -379,12 +422,12 @@ fun SettingsScreen(
                     }
                 }
 
-                // ── 3. リマインダー・触覚設定 (Reminders & Haptics) ──
+                // ── 4. リマインダー・触覚設定 (Notifications & Haptics) ──
                 item {
                     SettingsSectionCard(
-                        title = "リマインダー・触覚設定",
+                        title = "リマインダー・触覚フィードバック",
                         icon = Icons.Outlined.NotificationsActive,
-                        accentColor = MaterialTheme.colorScheme.tertiary
+                        accentColor = MaterialTheme.colorScheme.surfaceTint
                     ) {
                         SettingsSwitchRow(
                             title = "毎日の学習リマインダー",
@@ -410,7 +453,7 @@ fun SettingsScreen(
                                 )
                                 Surface(
                                     shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                                    color = MaterialTheme.colorScheme.primaryContainer,
                                     modifier = Modifier.clickable {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         showTimePickerDialog = true
@@ -425,25 +468,64 @@ fun SettingsScreen(
                                             imageVector = Icons.Outlined.Schedule,
                                             contentDescription = null,
                                             modifier = Modifier.size(16.dp),
-                                            tint = MaterialTheme.colorScheme.onTertiaryContainer
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
                                         )
                                         Text(
                                             text = studyPrefs.dailyReminderTime,
                                             style = MaterialTheme.typography.labelLarge,
                                             fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
                                         )
                                     }
                                 }
                             }
                         }
+
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 12.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                        )
+
+                        // Touch Synesthesia / Haptic Level
+                        Text(
+                            text = "Pixel 触覚フィードバック (Haptics)",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            TouchSynesthesia.entries.forEach { synesthesia ->
+                                val isSelected = themeSettings.touchSynesthesia == synesthesia
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        viewModel.setTouchSynesthesia(synesthesia)
+                                    },
+                                    label = { Text(synesthesia.label, fontSize = 12.sp) },
+                                    leadingIcon = if (isSelected) {
+                                        { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
+                                    } else null,
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        containerColor = Color.Transparent,
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    ),
+                                    shape = CircleShape
+                                )
+                            }
+                        }
                     }
                 }
 
-                // ── 4. データ・バックアップ (Data & Backup) ──
+                // ── 5. データ・アプリ情報 (Data, Storage & About) ──
                 item {
                     SettingsSectionCard(
-                        title = "データ・バックアップ",
+                        title = "データ・アプリ情報",
                         icon = Icons.Outlined.Storage,
                         accentColor = MaterialTheme.colorScheme.error
                     ) {

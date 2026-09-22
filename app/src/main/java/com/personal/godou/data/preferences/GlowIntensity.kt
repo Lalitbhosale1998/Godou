@@ -17,3 +17,11 @@ enum class GlowIntensity {
     }
 }
 
+val GlowIntensity.label: String
+    get() = when (this) {
+        GlowIntensity.OFF -> "オフ"
+        GlowIntensity.SUBTLE -> "控えめ"
+        GlowIntensity.NEON -> "ネオン"
+        GlowIntensity.PULSING -> "パルス"
+    }
+
