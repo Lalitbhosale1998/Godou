@@ -182,7 +182,7 @@ fun ExpressiveAboutSheet(
                 TechSpecRow(label = "Target Platform", value = "Android 17 (API 36+)")
                 TechSpecRow(label = "Design System", value = "Material 3 Expressive")
                 TechSpecRow(label = "Dynamic Color Engine", value = "Monet Wallpaper Tones")
-                TechSpecRow(label = "Graphics Shader", value = "Native AGSL Liquid Mesh")
+                TechSpecRow(label = "Dynamic Canvas Engine", value = "M3 Expressive Monet Canvas")
                 TechSpecRow(label = "Spaced Repetition Engine", value = "FSRS & Leitner SRS")
                 TechSpecRow(label = "Tactile Sensory", value = "Pixel Haptic Vibrations")
             }

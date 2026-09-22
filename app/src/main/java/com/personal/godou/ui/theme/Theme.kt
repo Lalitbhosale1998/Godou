@@ -161,36 +161,6 @@ fun Modifier.glow(
     }
 }
 
-private const val AGSL_EXPRESSIVE_BG_SHADER = """
-    uniform vec2 uResolution;
-    uniform float uTime;
-    layout(color) uniform vec4 uColorPrimary;
-    layout(color) uniform vec4 uColorSecondary;
-    layout(color) uniform vec4 uColorTertiary;
-
-    half4 main(in vec2 fragCoord) {
-        vec2 st = fragCoord / uResolution.xy;
-        st.x *= uResolution.x / max(uResolution.y, 1.0);
-
-        // Vibrant liquid aurora domain warping
-        vec2 q = vec2(0.0);
-        q.x = sin(st.x * 3.2 + uTime * 0.7);
-        q.y = cos(st.y * 3.2 + uTime * 0.6);
-
-        vec2 r = vec2(0.0);
-        r.x = sin(st.x * 4.5 + 3.5 * q.x + uTime * 0.8);
-        r.y = cos(st.y * 4.5 + 3.5 * q.y + uTime * 0.7);
-
-        float f = sin(st.x * 3.0 + r.x + uTime * 0.5) * cos(st.y * 3.0 + r.y + uTime * 0.5);
-        f = clamp(f * 0.5 + 0.5, 0.0, 1.0);
-
-        vec4 mix1 = mix(uColorPrimary, uColorTertiary, smoothstep(0.1, 0.65, f));
-        vec4 finalColor = mix(mix1, uColorSecondary, smoothstep(0.35, 0.85, f));
-
-        return half4(finalColor);
-    }
-"""
-
 fun Modifier.expressiveBackground(
     isDark: Boolean = false,
     isPrimaryContainer: Boolean = false,
@@ -203,77 +173,16 @@ fun Modifier.expressiveBackground(
     val tertiaryContainer = MaterialTheme.colorScheme.tertiaryContainer
     val backgroundColor = MaterialTheme.colorScheme.background
 
-    val animTime by androidx.compose.animation.core.rememberInfiniteTransition(label = "expressive_bg_time").animateFloat(
-        initialValue = 0f,
-        targetValue = 6.28318f,
-        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
-            androidx.compose.animation.core.tween(10000, easing = androidx.compose.animation.core.LinearEasing),
-            repeatMode = androidx.compose.animation.core.RepeatMode.Restart
-        ),
-        label = "expressive_bg_anim"
-    )
-
-    val runtimeShader = androidx.compose.runtime.remember {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            try {
-                android.graphics.RuntimeShader(AGSL_EXPRESSIVE_BG_SHADER)
-            } catch (_: Exception) {
-                null
-            }
-        } else null
-    }
-
     this.drawBehind {
         if (containerColor != Color.Unspecified) {
             drawRect(color = containerColor)
-        } else if (runtimeShader != null) {
-            // Step 1: Draw rich Monet background base layer (Option 1: Expressive Dynamic Monet Fluid Mesh)
-            if (isDark) {
-                drawRect(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            backgroundColor,
-                            primaryContainer.copy(alpha = 0.22f),
-                            tertiaryContainer.copy(alpha = 0.18f),
-                            backgroundColor
-                        )
-                    )
-                )
-            } else {
-                drawRect(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            primaryContainer.copy(alpha = 0.42f),
-                            tertiaryContainer.copy(alpha = 0.36f),
-                            secondaryContainer.copy(alpha = 0.30f),
-                            primaryContainer.copy(alpha = 0.25f)
-                        )
-                    )
-                )
-            }
-
-            // Step 2: Draw vibrant flowing liquid aurora AGSL shader swirls over Monet base
-            val alpha = if (isDark) 0.52f else 0.64f
-            runtimeShader.setFloatUniform("uTime", animTime)
-            runtimeShader.setFloatUniform("uResolution", size.width, size.height)
-            runtimeShader.setColorUniform("uColorPrimary", primaryContainer.copy(alpha = alpha).toArgb())
-            runtimeShader.setColorUniform("uColorSecondary", secondaryContainer.copy(alpha = alpha * 0.9f).toArgb())
-            runtimeShader.setColorUniform("uColorTertiary", tertiaryContainer.copy(alpha = alpha * 0.85f).toArgb())
-
-            val paint = android.graphics.Paint().apply {
-                shader = runtimeShader
-            }
-
-            drawIntoCanvas { canvas ->
-                canvas.nativeCanvas.drawRect(0f, 0f, size.width, size.height, paint)
-            }
         } else if (isDark) {
             drawRect(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        primaryContainer.copy(alpha = 0.30f),
                         backgroundColor,
-                        tertiaryContainer.copy(alpha = 0.25f),
+                        primaryContainer.copy(alpha = 0.20f),
+                        tertiaryContainer.copy(alpha = 0.15f),
                         backgroundColor
                     )
                 )
@@ -282,10 +191,10 @@ fun Modifier.expressiveBackground(
             drawRect(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        primaryContainer.copy(alpha = 0.28f),
-                        tertiaryContainer.copy(alpha = 0.22f),
-                        secondaryContainer.copy(alpha = 0.18f),
-                        primaryContainer.copy(alpha = 0.15f)
+                        primaryContainer.copy(alpha = 0.35f),
+                        tertiaryContainer.copy(alpha = 0.28f),
+                        secondaryContainer.copy(alpha = 0.22f),
+                        primaryContainer.copy(alpha = 0.18f)
                     )
                 )
             )
