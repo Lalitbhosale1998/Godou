@@ -114,7 +114,7 @@ fun GodouAppRoot(
                             .height(68.dp)
                             .wrapContentWidth(),
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.78f),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
                         shadowElevation = 10.dp
                     ) {
