@@ -227,31 +227,46 @@ fun Modifier.expressiveBackground(
         if (containerColor != Color.Unspecified) {
             drawRect(color = containerColor)
         } else if (runtimeShader != null) {
-            // Step 1: Draw rich Monet background base layer
+            // Step 1: Draw rich Monet background base layer (Option 1: Expressive Dynamic Monet Fluid Mesh)
             if (isDark) {
-                drawRect(color = backgroundColor)
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            backgroundColor,
+                            primaryContainer.copy(alpha = 0.22f),
+                            tertiaryContainer.copy(alpha = 0.18f),
+                            backgroundColor
+                        )
+                    )
+                )
             } else {
                 drawRect(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            primaryContainer.copy(alpha = 0.35f),
-                            tertiaryContainer.copy(alpha = 0.28f),
-                            secondaryContainer.copy(alpha = 0.25f),
-                            primaryContainer.copy(alpha = 0.20f)
+                            primaryContainer.copy(alpha = 0.42f),
+                            tertiaryContainer.copy(alpha = 0.36f),
+                            secondaryContainer.copy(alpha = 0.30f),
+                            primaryContainer.copy(alpha = 0.25f)
                         )
                     )
                 )
             }
 
             // Step 2: Draw vibrant flowing liquid aurora AGSL shader swirls over Monet base
-            val alpha = if (isDark) 0.45f else 0.58f
+            val alpha = if (isDark) 0.52f else 0.64f
             runtimeShader.setFloatUniform("uTime", animTime)
             runtimeShader.setFloatUniform("uResolution", size.width, size.height)
             runtimeShader.setColorUniform("uColorPrimary", primaryContainer.copy(alpha = alpha).toArgb())
-            runtimeShader.setColorUniform("uColorSecondary", secondaryContainer.copy(alpha = alpha * 0.85f).toArgb())
-            runtimeShader.setColorUniform("uColorTertiary", tertiaryContainer.copy(alpha = alpha * 0.9f).toArgb())
+            runtimeShader.setColorUniform("uColorSecondary", secondaryContainer.copy(alpha = alpha * 0.9f).toArgb())
+            runtimeShader.setColorUniform("uColorTertiary", tertiaryContainer.copy(alpha = alpha * 0.85f).toArgb())
 
-            drawRect(brush = androidx.compose.ui.graphics.ShaderBrush(runtimeShader))
+            val paint = android.graphics.Paint().apply {
+                shader = runtimeShader
+            }
+
+            drawIntoCanvas { canvas ->
+                canvas.nativeCanvas.drawRect(0f, 0f, size.width, size.height, paint)
+            }
         } else if (isDark) {
             drawRect(
                 brush = Brush.verticalGradient(
